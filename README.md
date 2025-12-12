@@ -97,8 +97,8 @@ A sophisticated typing simulator that mimics human behavior:
 ## Installation
 
 ### Option 1: Download Release
-Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
-Unzip the .zip file to any location on your computer. Ensure both the OmniMacro.exe and the configs folder are in the same folder. Run the .exe.
+- Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
+- Unzip the .zip file to any location on your computer. Ensure both the OmniMacro.exe and the configs folder are in the same folder. Run the .exe.
 
 ### Option 2: Build from Source
 
