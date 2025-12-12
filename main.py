@@ -1141,7 +1141,7 @@ def main(page: ft.Page):
                         ft.Row([
                             ft.Text("made by Entropify", size=12, color="grey", italic=True),
                             ft.Text("•", size=12, color="grey"),
-                            ft.Text("v1.0.1", size=12, color="grey", italic=True)
+                            ft.Text("v1.0.2", size=12, color="grey", italic=True)
                         ], spacing=5)
                     ], spacing=2),
                     theme_toggle
