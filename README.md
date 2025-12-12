@@ -26,9 +26,9 @@
 
 ---
 
-## ✨ Features
+## Features
 
-### 📝 Human Typer
+### Human Typer
 A sophisticated typing simulator that mimics human behavior:
 
 | Feature | Description |
@@ -42,37 +42,37 @@ A sophisticated typing simulator that mimics human behavior:
 | **Paragraph Pauses** | Pauses after newlines with configurable frequency |
 | **Synonym Swap** | Types synonym first, then corrects to intended word |
 
-> 💡 **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
+> **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
 
-### 🎯 Recoil Control
+### Recoil Control
 - **Vertical & Horizontal compensation** with adjustable strength
 - **LMB Only** or **LMB + RMB** activation modes
 - **Fine-tuning** with decimal precision (0.1 increments)
 - **Save/Load** configuration profiles
 - **Hotkey**: `F4`
 
-### ⌨️ Keyboard Macro
+### Keyboard Macro
 - Bind any key for **rapid-fire** repeating
 - Adjustable **delay** between key presses
 - **Hotkey**: `F5`
 
-### 🖱️ Auto Clicker
+### Auto Clicker
 - Adjustable **click interval** (1-1000ms)
 - **Hotkey**: `F6`
 
-### 💤 Anti-AFK
+### Anti-AFK
 - **Random direction** cursor movement with return
 - **Variable speed** to avoid detection
 - Adjustable **magnitude** and **interval**
 - **Hotkey**: `F7`
 
-### 🔄 Camera Spin
+### Camera Spin
 - **Continuous horizontal** cursor movement
 - **Left/Right** direction selection
 - Adjustable **speed** (pixels per tick)
 - **Hotkey**: `F8`
 
-### 🧩 Custom Macros
+### Custom Macros
 - **Unlimited** custom macro slots
 - Bind **keyboard keys** or **mouse buttons** as triggers
 - **Multi-key actions** - press multiple keys simultaneously
@@ -81,7 +81,7 @@ A sophisticated typing simulator that mimics human behavior:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -93,7 +93,7 @@ A sophisticated typing simulator that mimics human behavior:
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Option 1: Download Release
 Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
@@ -121,7 +121,7 @@ pyinstaller OmniMacro.spec --noconfirm
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 macro-master/
@@ -138,7 +138,7 @@ macro-master/
 
 ---
 
-## 🎮 Usage
+## Usage
 
 1. **Launch** `OmniMacro.exe` as Administrator
 2. **Navigate** using the sidebar tabs
@@ -158,7 +158,7 @@ macro-master/
 
 ---
 
-## 🎨 Screenshots
+## Screenshots
 
 <p align="center">
   <img src="screenshots/main.png" alt="Main Interface" width="45%"/>
@@ -176,7 +176,7 @@ The application features a modern **dark theme** with:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
 
@@ -198,7 +198,7 @@ limitations under the License.
 
 ---
 
-## 🙏 Credits & Acknowledgments
+## Credits & Acknowledgments
 
 - **[Final-Typer](https://github.com/Peteryhs/Final-Typer)** by Peteryhs - Inspiration for the Human Typer feature
 - **[Flet](https://flet.dev/)** - Modern Python UI framework
@@ -206,7 +206,7 @@ limitations under the License.
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This software is provided for **educational and personal use only**. The author is not responsible for any misuse of this tool. Use responsibly and in accordance with the terms of service of any applications or games you interact with.
 
