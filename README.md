@@ -20,7 +20,7 @@
 
 ## 📋 Overview
 
-**OmniMacro** is a comprehensive Windows automation utility designed for gamers, content creators, and power users. It combines multiple automation features into a single, intuitive interface with a modern dark theme.
+**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single, intuitive interface with a modern, sleek theme.
 
 > ⚠️ **Important**: Run as Administrator for full functionality.
 
