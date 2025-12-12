@@ -96,7 +96,7 @@ A sophisticated typing simulator that mimics human behavior:
 ## 📦 Installation
 
 ### Option 1: Download Release
-Download the latest `OmniMacro.exe` from the [Releases](../../releases) page.
+Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
 
 ### Option 2: Build from Source
 
