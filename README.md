@@ -18,61 +18,65 @@
 
 ---
 
-## 📋 Overview
+## Overview
 
-**OmniMacro** is a comprehensive Windows automation utility designed for gamers, content creators, and power users. It combines multiple automation features into a single, intuitive interface with a modern dark theme.
+**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single, intuitive interface with a modern, sleek theme.
 
-> ⚠️ **Important**: Run as Administrator for full functionality.
+> ⚠️ **Important**: If certain features don't work as intended, </strong>run as administrator</strong> for full functionality.
 
 ---
 
-## ✨ Features
+## Features
 
-### 📝 Human Typer
+### Human Typer
 A sophisticated typing simulator that mimics human behavior:
 
 | Feature | Description |
 |---------|-------------|
 | **Speed Range** | Variable WPM (10-200) for realistic variation |
 | **Typo Simulation** | Adjacent keys or random letters with auto-correction |
+| **Synonym Swap** | Types synonym first, then corrects to intended word |
 | **Correction Delay** | Configurable pause before fixing typos (20-1000ms) |
-| **Multi-Typos** | Simulate multiple consecutive errors |
+| **Multi-Typos** | Simulate multiple consecutive errors (smart limit based on word position) |
 | **Thinking Pauses** | Random pauses between words (0-50% frequency) |
 | **Sentence Pauses** | Pauses after `.!?` with configurable frequency |
 | **Paragraph Pauses** | Pauses after newlines with configurable frequency |
-| **Synonym Swap** | Types synonym first, then corrects to intended word |
+| **Special Char Delay** | Pauses 500-1500ms before typing symbols (simulates looking for keys) |
+| **Auto-Pause on Click** | Typing pauses if mouse clicked (prevents wrong location typing) |
+| **Resume** | Continue typing from exact position with 3-second countdown |
 
-> 💡 **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
 
-### 🎯 Recoil Control
+> **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
+
+### Recoil Control
 - **Vertical & Horizontal compensation** with adjustable strength
 - **LMB Only** or **LMB + RMB** activation modes
 - **Fine-tuning** with decimal precision (0.1 increments)
 - **Save/Load** configuration profiles
 - **Hotkey**: `F4`
 
-### ⌨️ Keyboard Macro
+### Keyboard Macro
 - Bind any key for **rapid-fire** repeating
 - Adjustable **delay** between key presses
 - **Hotkey**: `F5`
 
-### 🖱️ Auto Clicker
+### Auto Clicker
 - Adjustable **click interval** (1-1000ms)
 - **Hotkey**: `F6`
 
-### 💤 Anti-AFK
+### Anti-AFK
 - **Random direction** cursor movement with return
 - **Variable speed** to avoid detection
 - Adjustable **magnitude** and **interval**
 - **Hotkey**: `F7`
 
-### 🔄 Camera Spin
+### Camera Spin
 - **Continuous horizontal** cursor movement
 - **Left/Right** direction selection
 - Adjustable **speed** (pixels per tick)
 - **Hotkey**: `F8`
 
-### 🧩 Custom Macros
+### Custom Macros
 - **Unlimited** custom macro slots
 - Bind **keyboard keys** or **mouse buttons** as triggers
 - **Multi-key actions** - press multiple keys simultaneously
@@ -81,7 +85,7 @@ A sophisticated typing simulator that mimics human behavior:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -93,16 +97,17 @@ A sophisticated typing simulator that mimics human behavior:
 
 ---
 
-## 📦 Installation
+## Installation
 
-### Option 1: Download Release
-Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
+### Option 1: Download Release (see I actually package into .exe because I'm nice, unlike some people...)
+- Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
+- Unzip the .zip file to any location on your computer. Ensure both the OmniMacro.exe and the configs folder are in the same folder. Run the .exe (preferably as administrator).
 
 ### Option 2: Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/OmniMacro.git
+git clone https://github.com/Entropify/OmniMacro.git
 cd OmniMacro
 
 # Create virtual environment
@@ -121,10 +126,10 @@ pyinstaller OmniMacro.spec --noconfirm
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-macro-master/
+OmniMacro/
 ├── main.py           # GUI application and UI logic
 ├── macro_core.py     # Core automation engine
 ├── input_utils.py    # Low-level Windows input utilities
@@ -138,7 +143,7 @@ macro-master/
 
 ---
 
-## 🎮 Usage
+## Usage
 
 1. **Launch** `OmniMacro.exe` as Administrator
 2. **Navigate** using the sidebar tabs
@@ -158,7 +163,7 @@ macro-master/
 
 ---
 
-## 🎨 Screenshots
+## Screenshots
 
 <p align="center">
   <img src="screenshots/main.png" alt="Main Interface" width="45%"/>
@@ -176,7 +181,7 @@ The application features a modern **dark theme** with:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
 
@@ -198,7 +203,7 @@ limitations under the License.
 
 ---
 
-## 🙏 Credits & Acknowledgments
+## Credits & Acknowledgments
 
 - **[Final-Typer](https://github.com/Peteryhs/Final-Typer)** by Peteryhs - Inspiration for the Human Typer feature
 - **[Flet](https://flet.dev/)** - Modern Python UI framework
@@ -206,7 +211,7 @@ limitations under the License.
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This software is provided for **educational and personal use only**. The author is not responsible for any misuse of this tool. Use responsibly and in accordance with the terms of service of any applications or games you interact with.
 

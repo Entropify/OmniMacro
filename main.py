@@ -325,20 +325,42 @@ def main(page: ft.Page):
             humantyper_start_btn.text = "Stop Typing"
             humantyper_start_btn.disabled = False
             humantyper_start_btn.bgcolor = "#ef5350"
+            humantyper_resume_btn.visible = False
         else:
             humantyper_start_btn.text = "Start Typing (3s delay)"
             humantyper_start_btn.disabled = False
             humantyper_start_btn.bgcolor = "#616161"
+            humantyper_resume_btn.visible = False
+            humantyper_pause_text.visible = False
+        page.update()
+    
+    # Callback for Human Typer pause state
+    def update_humantyper_pause(is_paused):
+        if is_paused:
+            humantyper_resume_btn.visible = True
+            humantyper_pause_text.visible = True
+            humantyper_start_btn.text = "Stop Typing (Paused)"
+            humantyper_start_btn.bgcolor = "#ffa726"  # Orange for paused
+            # Scroll to bottom so Resume button is visible
+            humantyper_content.scroll_to(offset=-1, duration=300)
+        else:
+            humantyper_resume_btn.visible = False
+            humantyper_pause_text.visible = False
+            if core.humantyper_active:
+                humantyper_start_btn.text = "Stop Typing"
+                humantyper_start_btn.bgcolor = "#ef5350"
         page.update()
     
     core.set_callback(update_autoclick_switch, update_kb_switch, update_recoil_switch, update_antiafk_switch, update_cameraspin_switch, update_humantyper_status)
+    core.on_humantyper_pause = update_humantyper_pause
 
     autoclick_content = ft.Column([
         ft.Text("Auto Clicker", style="headlineMedium"),
         autoclick_switch,
         ft.Text("Click Interval"),
         ft.Row([autoclick_delay_slider, autoclick_delay_input], alignment="spaceBetween"),
-        ft.Text("Activation: Press 'F6' to Toggle ON/OFF", color="grey")
+        ft.Text("Activation: Press 'F6' to Toggle ON/OFF", color="grey"),
+        ft.Text("Note: There is a 0.5s delay after activation to prevent accidental toggle-off.", color="grey", size=12, italic=True)
     ])
 
     # --- Anti-AFK Controls ---
@@ -445,7 +467,8 @@ def main(page: ft.Page):
             humantyper_para_pause_switch.value,
             int(humantyper_para_pause_freq_slider.value),
             int(humantyper_para_pause_min_slider.value),
-            int(humantyper_para_pause_max_slider.value)
+            int(humantyper_para_pause_max_slider.value),
+            humantyper_special_char_delay_switch.value
         )
         humantyper_wpm_min_input.value = str(int(humantyper_wpm_min_slider.value))
         humantyper_wpm_max_input.value = str(int(humantyper_wpm_max_slider.value))
@@ -535,6 +558,8 @@ def main(page: ft.Page):
     humantyper_para_pause_min_input = ft.TextField(value="500", width=80, on_change=on_humantyper_change, suffix_text="ms")
     humantyper_para_pause_max_slider = ft.Slider(min=500, max=5000, divisions=18, label="{value}ms", value=2000, on_change=on_humantyper_change, expand=True)
     humantyper_para_pause_max_input = ft.TextField(value="2000", width=80, on_change=on_humantyper_change, suffix_text="ms")
+    # Special character delay toggle
+    humantyper_special_char_delay_switch = ft.Switch(label="Special Character Delay (pause before symbols)", value=False, on_change=on_humantyper_change)
     humantyper_start_btn = ft.ElevatedButton(
         text="Start Typing (3s delay)",
         on_click=start_humantyper_click,
@@ -543,6 +568,44 @@ def main(page: ft.Page):
         height=45,
         style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))
     )
+    
+    def resume_humantyper_click(e):
+        core.resume_humantyper()
+    
+    humantyper_resume_btn = ft.ElevatedButton(
+        text="Resume Typing (3s delay)",
+        on_click=lambda e: resume_with_delay(),
+        bgcolor="#4caf50",
+        color="white",
+        height=45,
+        visible=False,
+        style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))
+    )
+    
+    humantyper_pause_text = ft.Text(
+        "⚠️ Typing paused - mouse click detected. Click Resume to continue from where you stopped.",
+        color="#ffa726",
+        size=12,
+        italic=True,
+        visible=False
+    )
+    
+    def resume_with_delay():
+        humantyper_resume_btn.text = "Resuming in 3..."
+        humantyper_resume_btn.disabled = True
+        page.update()
+        
+        def countdown_and_resume():
+            for i in [3, 2, 1]:
+                humantyper_resume_btn.text = f"Resuming in {i}..."
+                page.update()
+                time.sleep(1)
+            core.resume_humantyper()
+            humantyper_resume_btn.text = "Resume Typing (3s delay)"
+            humantyper_resume_btn.disabled = False
+            page.update()
+        
+        threading.Thread(target=countdown_and_resume, daemon=True).start()
 
     humantyper_content = ft.Column([
         ft.Container(
@@ -609,12 +672,18 @@ def main(page: ft.Page):
                     humantyper_para_pause_max_input
                 ], vertical_alignment=ft.CrossAxisAlignment.CENTER),
                 ft.Divider(),
+                ft.Text("Special Character Delay", style="titleMedium"),
+                ft.Text("Pauses 500-1500ms before typing symbols (simulates looking for keys).", color="grey"),
+                humantyper_special_char_delay_switch,
+                ft.Divider(),
                 ft.Text("Synonym Swap", style="titleMedium"),
                 ft.Text("Types a synonym first, then corrects to the intended word.", color="grey"),
                 humantyper_synonym_switch,
                 ft.Text("Swap Frequency (% chance per word)"),
                 ft.Row([humantyper_synonym_freq_slider, humantyper_synonym_freq_input], alignment="spaceBetween"),
                 humantyper_start_btn,
+                humantyper_resume_btn,
+                humantyper_pause_text,
             ], spacing=8),
             padding=ft.padding.only(right=15)
         )
@@ -901,6 +970,32 @@ def main(page: ft.Page):
 
     # --- Info Controls ---
     info_text = """
+**Human Typer** *(Inspired by Final-Typer by Peteryhs)*
+- **Function**: Simulates human-like typing with natural delays and typos.
+- **Speed Range**: Set min/max WPM for realistic speed variation.
+- **Error Rate**: Adjust typo frequency (0-20%).
+- **Typo Style**: Choose adjacent keys (realistic) or random letters.
+- **Correction Delay**: Control how fast typos are fixed (20-1000ms).
+- **Max Typos**: Allow multiple consecutive typos before correction.
+  - Intelligently limits typos to remaining characters in word.
+- **Thinking Pauses**: Random pauses between words.
+  - Set min/max duration (100-5000ms) and frequency (0-50%).
+- **Sentence Pauses**: Pauses after sentences (.!?).
+  - Toggle on/off, set frequency (0-100%) and duration.
+- **Paragraph Pauses**: Pauses after new lines.
+  - Toggle on/off, set frequency (0-100%) and duration.
+- **Special Character Delay**: Pauses 500-1500ms before typing symbols.
+  - Simulates looking for hard-to-find keys on keyboard.
+- **Synonym Swap**: Types a synonym first, pauses, then corrects to intended word.
+  - Toggle enable/disable and set frequency (1-75%).
+  - Built-in dictionary with 200+ common words.
+- **Auto-Pause on Click**: Typing automatically pauses if you click your mouse.
+  - Prevents typing to wrong location if cursor moved.
+  - Shows warning message and Resume button.
+- **Resume**: Click Resume button to continue typing from where it stopped.
+  - 3-second countdown gives time to reposition cursor.
+- **Stop**: Click Stop button to cancel typing completely.
+
 **Recoil Control**
 - **Save/Load**: Use the buttons to save your settings to a Data file (.ini) or load a previous config.
 - **Activation**: Choose **LMB Only** or **LMB + RMB**. Toggle with switch or press **F4**.
@@ -924,24 +1019,6 @@ def main(page: ft.Page):
 - **Function**: Continuously moves cursor horizontally (spins camera in games).
 - **Direction**: Choose **Right** or **Left** spin direction.
 - **Speed**: Adjust pixels per tick for faster/slower spinning.
-
-**Human Typer** *(Inspired by Final-Typer by Peteryhs)*
-- **Function**: Simulates human-like typing with natural delays and typos.
-- **Speed Range**: Set min/max WPM for realistic speed variation.
-- **Error Rate**: Adjust typo frequency (0-20%).
-- **Typo Style**: Choose adjacent keys (realistic) or random letters.
-- **Correction Delay**: Control how fast typos are fixed (20-1000ms).
-- **Max Typos**: Allow multiple consecutive typos before correction.
-- **Thinking Pauses**: Random pauses between words.
-  - Set min/max duration (100-5000ms) and frequency (0-50%).
-- **Sentence Pauses**: Pauses after sentences (.!?).
-  - Toggle on/off, set frequency (0-100%) and duration.
-- **Paragraph Pauses**: Pauses after new lines.
-  - Toggle on/off, set frequency (0-100%) and duration.
-- **Synonym Swap**: Types a synonym first, pauses, then corrects to intended word.
-  - Toggle enable/disable and set frequency (1-75%).
-  - Built-in dictionary with 200+ common words.
-- **Stop**: Click the button again to stop typing mid-way.
 
 **Custom Macros**
 - **Create**: Click the **+** button to add a new custom macro.
@@ -967,8 +1044,8 @@ def main(page: ft.Page):
         margin=ft.margin.only(top=10, bottom=20)
     )
 
-    # Logo image (changes color based on theme)
-    logo_image = ft.Image(src=icon_path, width=40, height=40)
+    # Logo image (use relative path from assets_dir for Flet to resolve correctly)
+    logo_image = ft.Image(src="icon.png", width=40, height=40)
 
     # Theme toggle
     def toggle_theme(e):
@@ -1003,7 +1080,11 @@ def main(page: ft.Page):
                             logo_image,
                             ft.Text("OmniMacro", size=30, weight="bold"),
                         ], vertical_alignment=ft.CrossAxisAlignment.CENTER, spacing=10),
-                        ft.Text("made by Entropify", size=12, color="grey", italic=True)
+                        ft.Row([
+                            ft.Text("made by Entropify", size=12, color="grey", italic=True),
+                            ft.Text("•", size=12, color="grey"),
+                            ft.Text("v1.0.1", size=12, color="grey", italic=True)
+                        ], spacing=5)
                     ], spacing=2),
                     theme_toggle
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
@@ -1036,15 +1117,15 @@ def main(page: ft.Page):
         if idx == 0:
             switcher.content = info_content
         elif idx == 1:
-            switcher.content = recoil_content
-        elif idx == 2:
-            switcher.content = kb_content
-        elif idx == 3:
-            switcher.content = autoclick_content
-        elif idx == 4:
-            switcher.content = antiafk_content
-        elif idx == 5:
             switcher.content = humantyper_content
+        elif idx == 2:
+            switcher.content = recoil_content
+        elif idx == 3:
+            switcher.content = kb_content
+        elif idx == 4:
+            switcher.content = autoclick_content
+        elif idx == 5:
+            switcher.content = antiafk_content
         elif idx == 6:
             switcher.content = custom_macro_content
         page.update()
@@ -1060,6 +1141,9 @@ def main(page: ft.Page):
                 icon="info", selected_icon="info_outlined", label="Info"
             ),
             ft.NavigationRailDestination(
+                icon="edit", selected_icon="edit_outlined", label="Typer"
+            ),
+            ft.NavigationRailDestination(
                 icon="arrow_downward", selected_icon="arrow_downward", label="Recoil"
             ),
             ft.NavigationRailDestination(
@@ -1070,9 +1154,6 @@ def main(page: ft.Page):
             ),
             ft.NavigationRailDestination(
                 icon="snooze", selected_icon="snooze_outlined", label="Anti-AFK"
-            ),
-            ft.NavigationRailDestination(
-                icon="edit", selected_icon="edit_outlined", label="Typer"
             ),
             ft.NavigationRailDestination(
                 icon="extension", selected_icon="extension_outlined", label="Custom"

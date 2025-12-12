@@ -59,6 +59,10 @@ class MacroCore:
         self.humantyper_para_pause_min = 500  # ms
         self.humantyper_para_pause_max = 2000  # ms
         self.humantyper_text = ""
+        self.humantyper_paused = False  # Pause state for mouse click detection
+        self.humantyper_token_index = 0  # Track position in text for resume
+        self.on_humantyper_pause = None  # Callback for pause state changes
+        self.humantyper_special_char_delay_enabled = False  # Pause before special characters
         
         # Synonym dictionary for word swapping (200+ common words)
         self.synonym_dict = {
@@ -400,6 +404,12 @@ class MacroCore:
             self.is_binding = False
             return
 
+        # Pause human typer on any mouse click (cursor may have moved)
+        if pressed and self.humantyper_active and not self.humantyper_paused:
+            self.humantyper_paused = True
+            if self.on_humantyper_pause:
+                self.on_humantyper_pause(True)  # Notify UI that we're paused
+
         # Check Triggers
         if pressed and self.custom_macros:
             btn_name = str(button).split('.')[-1]
@@ -560,11 +570,17 @@ class MacroCore:
                 time.sleep(0.01)
 
     def _autoclicker_loop(self):
+        was_enabled = False
         while self.running:
             if self.autoclicker_enabled:
+                # Add delay when first enabled to prevent immediate re-click
+                if not was_enabled:
+                    was_enabled = True
+                    time.sleep(0.5)
                 input_utils.click()
                 time.sleep(self.autoclicker_delay)
             else:
+                was_enabled = False
                 time.sleep(0.01)
     
     def _kb_macro_loop(self):
@@ -660,7 +676,7 @@ class MacroCore:
         self.cameraspin_speed = speed
         self.cameraspin_direction = direction
 
-    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max):
+    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled):
         self.humantyper_wpm_min = wpm_min
         self.humantyper_wpm_max = wpm_max
         self.humantyper_error_rate = error_rate
@@ -680,11 +696,14 @@ class MacroCore:
         self.humantyper_para_pause_freq = para_pause_freq
         self.humantyper_para_pause_min = para_pause_min
         self.humantyper_para_pause_max = para_pause_max
+        self.humantyper_special_char_delay_enabled = special_char_delay_enabled
 
     def start_humantyper(self, text):
         if self.humantyper_active:
             return  # Already typing
         self.humantyper_text = text
+        self.humantyper_token_index = 0  # Reset position for fresh start
+        self.humantyper_paused = False
         self.humantyper_active = True
         threading.Thread(target=self._humantyper_run, daemon=True).start()
 
@@ -702,12 +721,19 @@ class MacroCore:
             'z': 'asx'
         }
         
-        def type_char_with_delay(char):
+        def type_char_with_delay(char, remaining_in_word=1):
             """Type a single character with appropriate delay and potential typos."""
             current_wpm = random.uniform(self.humantyper_wpm_min, self.humantyper_wpm_max)
             chars_per_minute = current_wpm * 5
             base_delay = 60.0 / chars_per_minute
             delay = base_delay * random.uniform(0.7, 1.3)
+            
+            # Special character delay - pause before characters that aren't letters, commas, or periods
+            # This simulates looking for hard-to-find symbols on the keyboard
+            if self.humantyper_special_char_delay_enabled:
+                if char not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,. \n':
+                    special_pause = random.uniform(0.5, 1.5)  # 500-1500ms
+                    time.sleep(special_pause)
             
             # Add longer pause at punctuation
             if char in '.!?':
@@ -742,7 +768,9 @@ class MacroCore:
             # Simulate typo based on error rate
             if random.random() * 100 < self.humantyper_error_rate:
                 lower_char = char.lower()
-                num_typos = random.randint(1, max(1, self.humantyper_max_typos))
+                # Limit typos to remaining characters in word (can't make more typos than chars left)
+                max_possible_typos = min(self.humantyper_max_typos, remaining_in_word)
+                num_typos = random.randint(1, max(1, max_possible_typos))
                 
                 for _ in range(num_typos):
                     if self.humantyper_typo_mode == 0:
@@ -771,10 +799,12 @@ class MacroCore:
         
         def type_word(word):
             """Type a word character by character."""
-            for char in word:
+            word_len = len(word)
+            for i, char in enumerate(word):
                 if not self.humantyper_active or not self.running:
                     return False
-                type_char_with_delay(char)
+                remaining_in_word = word_len - i  # chars left including current
+                type_char_with_delay(char, remaining_in_word)
             return True
         
         def delete_word(word_len):
@@ -791,9 +821,19 @@ class MacroCore:
         import re
         tokens = re.findall(r'\b\w+\b|[^\w]+', self.humantyper_text)
         
-        for token in tokens:
+        # Start from saved token index (for resume support)
+        token_index = self.humantyper_token_index
+        
+        while token_index < len(tokens):
+            # Check for pause - wait until resumed or stopped
+            while self.humantyper_paused and self.humantyper_active and self.running:
+                self.humantyper_token_index = token_index  # Save position
+                time.sleep(0.1)  # Wait while paused
+            
             if not self.humantyper_active or not self.running:
                 break
+            
+            token = tokens[token_index]
             
             # Check if this is a word (alphanumeric)
             if token.isalpha():
@@ -837,12 +877,30 @@ class MacroCore:
             else:
                 # Type non-word characters (spaces, punctuation, etc.)
                 for char in token:
+                    # Check for pause during character loop
+                    while self.humantyper_paused and self.humantyper_active and self.running:
+                        self.humantyper_token_index = token_index
+                        time.sleep(0.1)
                     if not self.humantyper_active or not self.running:
                         break
                     type_char_with_delay(char)
+            
+            token_index += 1
         
+        # Reset state when done
+        self.humantyper_token_index = 0
+        self.humantyper_paused = False
         self.humantyper_active = False
         if self.on_humantyper_toggle:
             self.on_humantyper_toggle(False)
+        if self.on_humantyper_pause:
+            self.on_humantyper_pause(False)
+
+    def resume_humantyper(self):
+        """Resume typing from where it was paused."""
+        if self.humantyper_active and self.humantyper_paused:
+            self.humantyper_paused = False
+            if self.on_humantyper_pause:
+                self.on_humantyper_pause(False)  # Notify UI we're no longer paused
 
 core = MacroCore()
