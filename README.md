@@ -28,6 +28,22 @@
 
 ## ✨ Features
 
+### 📝 Human Typer
+A sophisticated typing simulator that mimics human behavior:
+
+| Feature | Description |
+|---------|-------------|
+| **Speed Range** | Variable WPM (10-200) for realistic variation |
+| **Typo Simulation** | Adjacent keys or random letters with auto-correction |
+| **Correction Delay** | Configurable pause before fixing typos (20-1000ms) |
+| **Multi-Typos** | Simulate multiple consecutive errors |
+| **Thinking Pauses** | Random pauses between words (0-50% frequency) |
+| **Sentence Pauses** | Pauses after `.!?` with configurable frequency |
+| **Paragraph Pauses** | Pauses after newlines with configurable frequency |
+| **Synonym Swap** | Types synonym first, then corrects to intended word |
+
+> 💡 **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
+
 ### 🎯 Recoil Control
 - **Vertical & Horizontal compensation** with adjustable strength
 - **LMB Only** or **LMB + RMB** activation modes
@@ -56,22 +72,6 @@
 - Adjustable **speed** (pixels per tick)
 - **Hotkey**: `F8`
 
-### 📝 Human Typer
-A sophisticated typing simulator that mimics human behavior:
-
-| Feature | Description |
-|---------|-------------|
-| **Speed Range** | Variable WPM (10-200) for realistic variation |
-| **Typo Simulation** | Adjacent keys or random letters with auto-correction |
-| **Correction Delay** | Configurable pause before fixing typos (20-1000ms) |
-| **Multi-Typos** | Simulate multiple consecutive errors |
-| **Thinking Pauses** | Random pauses between words (0-50% frequency) |
-| **Sentence Pauses** | Pauses after `.!?` with configurable frequency |
-| **Paragraph Pauses** | Pauses after newlines with configurable frequency |
-| **Synonym Swap** | Types synonym first, then corrects to intended word |
-
-> 💡 **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
-
 ### 🧩 Custom Macros
 - **Unlimited** custom macro slots
 - Bind **keyboard keys** or **mouse buttons** as triggers
@@ -96,7 +96,7 @@ A sophisticated typing simulator that mimics human behavior:
 ## 📦 Installation
 
 ### Option 1: Download Release
-Download the latest `OmniMacro.exe` from the [Releases](../../releases) page.
+Download the latest `OmniMacro.zip` from the [Releases](../../releases) page.
 
 ### Option 2: Build from Source
 
