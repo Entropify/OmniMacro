@@ -468,7 +468,13 @@ def main(page: ft.Page):
             int(humantyper_para_pause_freq_slider.value),
             int(humantyper_para_pause_min_slider.value),
             int(humantyper_para_pause_max_slider.value),
-            humantyper_special_char_delay_switch.value
+            humantyper_special_char_delay_switch.value,
+            humantyper_crashout_switch.value,
+            int(humantyper_crashout_count_input.value or 1),
+            humantyper_nihilism_switch.value,
+            int(humantyper_nihilism_count_input.value or 1),
+            humantyper_vamp_switch.value,
+            int(humantyper_vamp_count_input.value or 1)
         )
         humantyper_wpm_min_input.value = str(int(humantyper_wpm_min_slider.value))
         humantyper_wpm_max_input.value = str(int(humantyper_wpm_max_slider.value))
@@ -560,6 +566,13 @@ def main(page: ft.Page):
     humantyper_para_pause_max_input = ft.TextField(value="2000", width=80, on_change=on_humantyper_change, suffix_text="ms")
     # Special character delay toggle
     humantyper_special_char_delay_switch = ft.Switch(label="Special Character Delay (pause before symbols)", value=False, on_change=on_humantyper_change)
+    # Emotion Simulator controls
+    humantyper_crashout_switch = ft.Switch(label="Crashout Mode", value=False, on_change=on_humantyper_change)
+    humantyper_crashout_count_input = ft.TextField(value="1", width=50, on_change=on_humantyper_change, text_align=ft.TextAlign.CENTER)
+    humantyper_nihilism_switch = ft.Switch(label="Nihilism Mode", value=False, on_change=on_humantyper_change)
+    humantyper_nihilism_count_input = ft.TextField(value="1", width=50, on_change=on_humantyper_change, text_align=ft.TextAlign.CENTER)
+    humantyper_vamp_switch = ft.Switch(label="Vamp Mode", value=False, on_change=on_humantyper_change)
+    humantyper_vamp_count_input = ft.TextField(value="1", width=50, on_change=on_humantyper_change, text_align=ft.TextAlign.CENTER)
     humantyper_start_btn = ft.ElevatedButton(
         text="Start Typing (3s delay)",
         on_click=start_humantyper_click,
@@ -681,6 +694,15 @@ def main(page: ft.Page):
                 humantyper_synonym_switch,
                 ft.Text("Swap Frequency (% chance per word)"),
                 ft.Row([humantyper_synonym_freq_slider, humantyper_synonym_freq_input], alignment="spaceBetween"),
+                ft.Divider(),
+                ft.Text("Emotion Simulator", style="titleMedium"),
+                ft.Text("Triggers after 20% of text is typed. Won't happen back-to-back.", color="grey"),
+                ft.Row([humantyper_crashout_switch, ft.Text("Times:", size=12), humantyper_crashout_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                ft.Text("Crashout: Quickly spam random letters like raging, then deletes them.", color="grey", size=11, italic=True),
+                ft.Row([humantyper_nihilism_switch, ft.Text("Times:", size=12), humantyper_nihilism_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                ft.Text("Nihilism: Type a nihilistic phrase, pause to contemplate, then deletes it.", color="grey", size=11, italic=True),
+                ft.Row([humantyper_vamp_switch, ft.Text("Times:", size=12), humantyper_vamp_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                ft.Text("Vamp: Type random Playboi Carti lyrics when bored, then deletes them. (these lyrics are not explicit you won't get in trouble don't worry lol)", color="grey", size=11, italic=True),
                 humantyper_start_btn,
                 humantyper_resume_btn,
                 humantyper_pause_text,
@@ -969,65 +991,93 @@ def main(page: ft.Page):
     refresh_macro_list()
 
     # --- Info Controls ---
-    info_text = """
-**Human Typer** *(Inspired by Final-Typer by Peteryhs)*
+    feature_cards = []  # Store cards for theme toggle updates
+    
+    def create_feature_card(title, content):
+        """Create a styled container for a feature section."""
+        card = ft.Container(
+            content=ft.Column([
+                ft.Text(title, style="titleMedium", weight="bold"),
+                ft.Markdown(content, extension_set="gitHubWeb")
+            ], spacing=5),
+            bgcolor="#1e1e1e",
+            border=ft.border.all(1, "#333333"),
+            border_radius=12,
+            padding=15,
+            expand=True,  # Expand within the Row
+        )
+        feature_cards.append(card)
+        # Row forces full width, Container expand fills it
+        return ft.Row([card])
+    
+    humantyper_info = """
 - **Function**: Simulates human-like typing with natural delays and typos.
 - **Speed Range**: Set min/max WPM for realistic speed variation.
 - **Error Rate**: Adjust typo frequency (0-20%).
 - **Typo Style**: Choose adjacent keys (realistic) or random letters.
 - **Correction Delay**: Control how fast typos are fixed (20-1000ms).
 - **Max Typos**: Allow multiple consecutive typos before correction.
-  - Intelligently limits typos to remaining characters in word.
-- **Thinking Pauses**: Random pauses between words.
-  - Set min/max duration (100-5000ms) and frequency (0-50%).
+- **Thinking Pauses**: Random pauses between words (100-5000ms).
 - **Sentence Pauses**: Pauses after sentences (.!?).
-  - Toggle on/off, set frequency (0-100%) and duration.
 - **Paragraph Pauses**: Pauses after new lines.
-  - Toggle on/off, set frequency (0-100%) and duration.
 - **Special Character Delay**: Pauses 500-1500ms before typing symbols.
-  - Simulates looking for hard-to-find keys on keyboard.
-- **Synonym Swap**: Types a synonym first, pauses, then corrects to intended word.
-  - Toggle enable/disable and set frequency (1-75%).
-  - Built-in dictionary with 200+ common words.
-- **Auto-Pause on Click**: Typing automatically pauses if you click your mouse.
-  - Prevents typing to wrong location if cursor moved.
-  - Shows warning message and Resume button.
-- **Resume**: Click Resume button to continue typing from where it stopped.
-  - 3-second countdown gives time to reposition cursor.
-- **Stop**: Click Stop button to cancel typing completely.
+- **Synonym Swap**: Types a synonym first, then corrects to intended word.
+- **Emotion Simulator**: Simulates emotional moments mid-typing.
+  - **Crashout**: Rage-mashes random characters, then deletes.
+  - **Nihilism**: Types existential phrases, then deletes.
+  - **Vamp**: Types Playboi Carti lyrics, then deletes.
+- **Auto-Pause on Click**: Pauses if mouse clicked to prevent wrong location.
+- **Resume/Stop**: Continue from where stopped or cancel completely.
 
-**Recoil Control**
-- **Save/Load**: Use the buttons to save your settings to a Data file (.ini) or load a previous config.
-- **Activation**: Choose **LMB Only** or **LMB + RMB**. Toggle with switch or press **F4**.
+*Inspired by Final-Typer by Peteryhs*
+"""
+
+    recoil_info = """
+- **Save/Load**: Save settings to .ini file or load previous config.
+- **Activation**: Choose **LMB Only** or **LMB + RMB**. Hotkey: **F4**.
 - **Directional**: Vertical (Up/Down) & Horizontal (Left/Right).
+"""
 
-**Keyboard Macro**
+    keyboard_info = """
 - **Setup**: Click **"Target Key"** to bind any key.
 - **Activation**: Toggle switch or press **F5**.
+"""
 
-**Auto Clicker**
+    autoclicker_info = """
 - **Activation**: Toggle switch or press **F6**.
+- **Interval**: Adjustable click delay (1-1000ms).
+"""
 
-**Anti-AFK**
+    antiafk_info = """
 - **Activation**: Toggle switch or press **F7**.
-- **Movement**: Cursor moves in a random direction then returns.
-- **Random Speed**: Movement speed varies randomly to avoid detection.
-- **Settings**: Adjust magnitude (distance) and interval (time between movements).
+- **Movement**: Cursor moves in random direction then returns.
+- **Random Speed**: Movement speed varies to avoid detection.
+- **Settings**: Adjust magnitude and interval.
+"""
 
-**Camera Spin**
+    cameraspin_info = """
 - **Activation**: Toggle switch or press **F8**.
-- **Function**: Continuously moves cursor horizontally (spins camera in games).
+- **Function**: Continuously moves cursor horizontally (spins camera).
 - **Direction**: Choose **Right** or **Left** spin direction.
 - **Speed**: Adjust pixels per tick for faster/slower spinning.
+"""
 
-**Custom Macros**
-- **Create**: Click the **+** button to add a new custom macro.
-- **Trigger**: Bind any keyboard key or mouse button as the trigger.
-- **Actions**: Record multiple keys to press simultaneously when triggered.
-- **Hold to Repeat**: While holding the trigger, actions repeat continuously.
-- **Persistence**: Custom macros are automatically saved and restored on app restart.
-- **Edit/Delete**: Use the edit and delete buttons next to each macro.
-    """
+    custommacro_info = """
+- **Create**: Click **+** button to add a new macro.
+- **Trigger**: Bind any keyboard key or mouse button.
+- **Actions**: Record multiple keys to press simultaneously.
+- **Hold to Repeat**: Actions repeat while holding trigger.
+- **Persistence**: Macros saved and restored on restart.
+- **Edit/Delete**: Use buttons next to each macro.
+"""
+
+    humantyper_card = create_feature_card("Human Typer", humantyper_info)
+    recoil_card = create_feature_card("Recoil Control", recoil_info)
+    keyboard_card = create_feature_card("Keyboard Macro", keyboard_info)
+    autoclicker_card = create_feature_card("Auto Clicker", autoclicker_info)
+    antiafk_card = create_feature_card("Anti-AFK", antiafk_info)
+    cameraspin_card = create_feature_card("Camera Spin", cameraspin_info)
+    custommacro_card = create_feature_card("Custom Macros", custommacro_info)
     
     important_card = ft.Container(
         content=ft.Row([
@@ -1055,12 +1105,20 @@ def main(page: ft.Page):
             theme_toggle.label = "Light"
             theme_toggle.thumb_icon = "light_mode"
             logo_image.color = "#000000"  # Black logo for light mode
+            # Update feature cards for light mode
+            for card in feature_cards:
+                card.bgcolor = "#ffffff"
+                card.border = ft.border.all(1, "#e0e0e0")
         else:
             page.theme_mode = ft.ThemeMode.DARK
             page.bgcolor = "#121212"
             theme_toggle.label = "Dark"
             theme_toggle.thumb_icon = "dark_mode"
             logo_image.color = None  # Original logo for dark mode
+            # Update feature cards for dark mode
+            for card in feature_cards:
+                card.bgcolor = "#1e1e1e"
+                card.border = ft.border.all(1, "#333333")
         page.update()
     
     theme_toggle = ft.Switch(
@@ -1090,7 +1148,13 @@ def main(page: ft.Page):
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                 ft.Divider(),
                 important_card,
-                ft.Markdown(info_text, extension_set="gitHubWeb")
+                humantyper_card,
+                recoil_card,
+                keyboard_card,
+                autoclicker_card,
+                antiafk_card,
+                cameraspin_card,
+                custommacro_card,
             ], spacing=10),
             padding=ft.padding.only(right=15)
         )

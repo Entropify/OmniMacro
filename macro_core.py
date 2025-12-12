@@ -64,6 +64,99 @@ class MacroCore:
         self.on_humantyper_pause = None  # Callback for pause state changes
         self.humantyper_special_char_delay_enabled = False  # Pause before special characters
         
+        # Emotion Simulator settings
+        self.humantyper_crashout_enabled = False  # Rage typing - spam random letters
+        self.humantyper_crashout_count = 1  # Number of times to trigger
+        self.humantyper_nihilism_enabled = False  # Insert nihilistic phrases mid-typing
+        self.humantyper_nihilism_count = 1  # Number of times to trigger
+        self.humantyper_vamp_enabled = False  # Insert Playboi Carti lyrics mid-typing
+        self.humantyper_vamp_count = 1  # Number of times to trigger
+        
+        # Nihilistic phrases list - ADD YOUR OWN PHRASES HERE
+        # Each phrase will be typed out, then deleted after a pause
+        self.nihilism_phrases = [
+            "omggggg bro i hate writing this",
+            "wat even is the point of writing this",
+            "i dont even know why im writing ts",
+            "bro would the world rlly be any different if i wrote this",
+            "man theres no point in writing this",
+            "fml bro i cannot write ts",
+            "bro writing ts genuinely pmo",
+            "ts is gon take forever to write omgggggggggggg",
+            "when can i actually finish this and enjoy my life bro",
+            "why tf am i even writing this",
+            "bro i suck at writing when can i stop :(((",
+            "i should be sleeping rn",
+            "i couldve been playing games rn",
+            "my bed is calling me fr",
+            "bro i started this so long ago and im not even halfway",
+            "how is this still not enough words wtf",
+            "i hate my past self for procrastinating",
+            "why did i do this to myself",
+            "shouldve just took the L on this assignment",
+            "bro i need a break so bad",
+            "can my brain like function pls",
+            "im so cooked if this isnt good",
+            "teachers dont even grade fairly anyway",
+            "bro does anyone even read these",
+            "whats the point of anything fr",
+            "why do we even have to write ts bro its pointless",
+            "this assignment is not gon change my life bro",
+            "nobody cares abt this topic fr",
+            "in 100 years none of this will matter",
+            "we all die anyway why am i writing this",
+            "the universe is infinite and im writing abt ts",
+            "bro ts is so meaningless",
+            "50 years from now nobody will remember ts essay existed"
+        ]
+        
+        # Vamp Mode settings
+        self.humantyper_vamp_enabled = False  # Insert Playboi Carti lyrics mid-typing
+        
+        # Vamp lyrics list - ADD YOUR OWN LYRICS HERE
+        self.vamp_lyrics = [
+            "i told my boy go rollup ten blunts for meeee",
+            "SEEEEEEYAHHHHHH",
+            "SLAT SLATTTTT SLATTTT",
+            "2024 MUSICC",
+            "bah bah bahh",
+            "RACKS ALL IN MY JEANNNS AND THEY RAF SIMONSSSS",
+            "YSL 4LLLL",
+            "I RATHERRR LIE THAN TO LOSEEEEE U GRILLLL",
+            "MONEY SITTING TALL YAO MINGGGG",
+            "VWAHHHHHHH",
+            "weeee lit bruhhh",
+            "whole lotta ho whole lotta reddddd",
+            "YOOO PIERRE U WANNA COME OUT HEREEEEE?",
+            "INNNN NY I MILLY ROCKKKKK",
+            "i mix allof my problem with prometh till i rollon my deathbedddd",
+            "LOOOK AT THESE DIAMONDS THEY SHINING LOOK AT THESE BIH THEY LYINGGGG",
+            "money ontop of me money ontop herrrr",
+            "DONT SAY YOUD DIE FOR ME LIL BIH JUST DIEEEEEEE",
+            "TWO TONE YELLOW APEEZY LOOKIN LIKE WHEEZYYYY",
+            "sick bih sick kid lifes crazy scaryyyy",
+            "IM IN LUV WITH THE GUAP GIVE IT A WEDDING RINGGGGG",
+            "shoutout gigi that my boo she know that i claimmmm",
+            "BAHHH BAHH BAHH BAHHH BAHHH BAHHHB",
+            "yo pierreee that my slatttttt",
+            "CARTI AND KP YEHHH THATS LIKE CARTI AND PIERREEEE",
+            "SWAMP IZZOOOO",
+            "seeeyah seeyah",
+            "WRIST IN THE FREEZER IMA CRASHOUT CUS U MINEEE",
+            "I CANT COME TO UR PARTY IMA COME JUST TO HURT U SEEYAHHHH",
+            "IMA SOUTHSIDE BABI IM OUTTA CONTROLLLL",
+            "ME N U GOT NTHING IN COMMONN",
+            "posted up w my dogs scooby doo typeeeee",
+            "I WAS IN THE SPOT YESTERDAY W MY POPS MY GRANDMA STILL PLAY BINGOOO",
+            "before im dyinnnnn everyday im dyinnnnn everyday im dying for luv",
+            "TURN THAT TAKE THAT AUTOTUNE OFFF",
+            "what what u cannot hopin my carrrr",
+            "LIKE IM TOOLIT LIKE OM GAWDDD"
+            "WE AINT GOT TIMEEEE I DROPP MY DEMONS OFFFF",
+            "16 29 THROW THAT THROW THAT THROW THATTTT",
+            "IVE BEEN WINNING ALLDAY I NEED A PITSTOPPP"
+        ]
+        
         # Synonym dictionary for word swapping (200+ common words)
         self.synonym_dict = {
             # Common adjectives
@@ -676,7 +769,7 @@ class MacroCore:
         self.cameraspin_speed = speed
         self.cameraspin_direction = direction
 
-    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled):
+    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled, crashout_enabled, crashout_count, nihilism_enabled, nihilism_count, vamp_enabled, vamp_count):
         self.humantyper_wpm_min = wpm_min
         self.humantyper_wpm_max = wpm_max
         self.humantyper_error_rate = error_rate
@@ -697,6 +790,12 @@ class MacroCore:
         self.humantyper_para_pause_min = para_pause_min
         self.humantyper_para_pause_max = para_pause_max
         self.humantyper_special_char_delay_enabled = special_char_delay_enabled
+        self.humantyper_crashout_enabled = crashout_enabled
+        self.humantyper_crashout_count = crashout_count
+        self.humantyper_nihilism_enabled = nihilism_enabled
+        self.humantyper_nihilism_count = nihilism_count
+        self.humantyper_vamp_enabled = vamp_enabled
+        self.humantyper_vamp_count = vamp_count
 
     def start_humantyper(self, text):
         if self.humantyper_active:
@@ -731,7 +830,7 @@ class MacroCore:
             # Special character delay - pause before characters that aren't letters, commas, or periods
             # This simulates looking for hard-to-find symbols on the keyboard
             if self.humantyper_special_char_delay_enabled:
-                if char not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,. \n':
+                if char not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.!? \n':
                     special_pause = random.uniform(0.5, 1.5)  # 500-1500ms
                     time.sleep(special_pause)
             
@@ -768,6 +867,7 @@ class MacroCore:
             # Simulate typo based on error rate
             if random.random() * 100 < self.humantyper_error_rate:
                 lower_char = char.lower()
+                is_upper = char.isupper()  # Track if original char is uppercase
                 # Limit typos to remaining characters in word (can't make more typos than chars left)
                 max_possible_typos = min(self.humantyper_max_typos, remaining_in_word)
                 num_typos = random.randint(1, max(1, max_possible_typos))
@@ -780,6 +880,9 @@ class MacroCore:
                             wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
                     else:
                         wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
+                    # Match case of original character
+                    if is_upper:
+                        wrong_char = wrong_char.upper()
                     kb.type(wrong_char)
                     time.sleep(delay * 0.5)
                 
@@ -814,12 +917,159 @@ class MacroCore:
                 kb.release(Key.backspace)
                 time.sleep(random.uniform(0.08, 0.15))
         
+        def do_crashout():
+            """Simulate a rage typing moment - spam random letters quickly, then delete them."""
+            # Type the prefix first
+            prefix = "omfg bro im gonna crash out "
+            for char in prefix:
+                if not self.humantyper_active or not self.running:
+                    return
+                kb.type(char)
+                time.sleep(random.uniform(0.03, 0.07))
+            
+            # Spam 15-40 random characters VERY fast (violent rage mode)
+            num_chars = random.randint(15, 40)
+            chars_typed = ""
+            for _ in range(num_chars):
+                if not self.humantyper_active or not self.running:
+                    return
+                char = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()!!')
+                chars_typed += char
+                kb.type(char)
+                time.sleep(random.uniform(0.01, 0.03))  # Extremely fast mashing
+            
+            # Pause for a few seconds to "realize what happened"
+            time.sleep(random.uniform(2.0, 4.0))
+            
+            # Delete everything (prefix + gibberish) quickly
+            total_to_delete = len(prefix) + len(chars_typed)
+            for _ in range(total_to_delete):
+                kb.press(Key.backspace)
+                kb.release(Key.backspace)
+                time.sleep(random.uniform(0.02, 0.05))
+        
+        def do_nihilism():
+            """Insert a nihilistic phrase, pause, then delete it."""
+            if not self.nihilism_phrases:
+                return  # No phrases configured
+            
+            phrase = random.choice(self.nihilism_phrases)
+            if not phrase:
+                return
+            
+            # Go to a new line first
+            kb.press(Key.enter)
+            kb.release(Key.enter)
+            time.sleep(random.uniform(0.1, 0.2))
+            
+            # Type the nihilistic phrase
+            for char in phrase:
+                if not self.humantyper_active or not self.running:
+                    return
+                kb.type(char)
+                time.sleep(random.uniform(0.05, 0.12))  # Slower, deliberate typing
+            
+            # Pause to "contemplate"
+            time.sleep(random.uniform(1.0, 2.5))
+            
+            # Delete the phrase and the newline
+            for _ in range(len(phrase) + 1):  # +1 for the newline
+                kb.press(Key.backspace)
+                kb.release(Key.backspace)
+                time.sleep(random.uniform(0.04, 0.08))
+        
+        def do_vamp():
+            """Insert a Playboi Carti lyric, pause, then delete it."""
+            if not self.vamp_lyrics:
+                return  # No lyrics configured
+            
+            lyric = random.choice(self.vamp_lyrics)
+            if not lyric:
+                return
+            
+            # Go to a new line first
+            kb.press(Key.enter)
+            kb.release(Key.enter)
+            time.sleep(random.uniform(0.1, 0.2))
+            
+            # Type the lyric
+            for char in lyric:
+                if not self.humantyper_active or not self.running:
+                    return
+                kb.type(char)
+                time.sleep(random.uniform(0.05, 0.12))  # Slower, deliberate typing
+            
+            # Pause to vibe
+            time.sleep(random.uniform(1.0, 2.5))
+            
+            # Delete the lyric and the newline
+            for _ in range(len(lyric) + 1):  # +1 for the newline
+                kb.press(Key.backspace)
+                kb.release(Key.backspace)
+                time.sleep(random.uniform(0.04, 0.08))
+        
         if self.on_humantyper_toggle:
             self.on_humantyper_toggle(True)
         
         # Parse text into tokens (words and non-words)
         import re
         tokens = re.findall(r'\b\w+\b|[^\w]+', self.humantyper_text)
+        
+        # Calculate when to trigger Emotion Simulator events
+        total_tokens = len(tokens)
+        crisis_triggers = []
+        
+        if total_tokens > 10:  # Only trigger if text is long enough
+            trigger_start = int(total_tokens * 0.2)  # Can trigger after 20% of text
+            available_range = list(range(trigger_start, total_tokens))
+            min_spacing = 5  # Minimum tokens between triggers to prevent back-to-back
+            
+            # Collect all trigger positions with spacing
+            used_positions = set()
+            
+            def get_spaced_positions(count, available):
+                """Get positions with minimum spacing between them."""
+                positions = []
+                remaining = available.copy()
+                for _ in range(count):
+                    if not remaining:
+                        break
+                    pos = random.choice(remaining)
+                    positions.append(pos)
+                    # Remove positions too close to this one
+                    remaining = [p for p in remaining if abs(p - pos) >= min_spacing]
+                return positions
+            
+            # Track all positions that will be used (for spacing between different modes)
+            all_candidate_positions = available_range.copy()
+            
+            # Crashout mode triggers
+            if self.humantyper_crashout_enabled and self.humantyper_crashout_count > 0:
+                crashout_positions = get_spaced_positions(self.humantyper_crashout_count, all_candidate_positions)
+                for pos in crashout_positions:
+                    crisis_triggers.append((pos, 'crashout'))
+                    # Remove nearby positions from candidates for other modes
+                    all_candidate_positions = [p for p in all_candidate_positions if abs(p - pos) >= min_spacing]
+            
+            # Nihilism mode triggers
+            if self.humantyper_nihilism_enabled and self.nihilism_phrases and self.humantyper_nihilism_count > 0:
+                nihilism_positions = get_spaced_positions(self.humantyper_nihilism_count, all_candidate_positions)
+                for pos in nihilism_positions:
+                    crisis_triggers.append((pos, 'nihilism'))
+                    all_candidate_positions = [p for p in all_candidate_positions if abs(p - pos) >= min_spacing]
+            
+            # Vamp mode triggers
+            if self.humantyper_vamp_enabled and self.vamp_lyrics and self.humantyper_vamp_count > 0:
+                vamp_positions = get_spaced_positions(self.humantyper_vamp_count, all_candidate_positions)
+                for pos in vamp_positions:
+                    crisis_triggers.append((pos, 'vamp'))
+        
+        # Convert to a dict for quick lookup
+        crisis_trigger_dict = {}
+        for pos, crisis_type in crisis_triggers:
+            if pos not in crisis_trigger_dict:
+                crisis_trigger_dict[pos] = []
+            crisis_trigger_dict[pos].append(crisis_type)
         
         # Start from saved token index (for resume support)
         token_index = self.humantyper_token_index
@@ -832,6 +1082,18 @@ class MacroCore:
             
             if not self.humantyper_active or not self.running:
                 break
+            
+            # Check for Existential Crisis Mode triggers at this position
+            if token_index in crisis_trigger_dict:
+                for crisis_type in crisis_trigger_dict[token_index]:
+                    if not self.humantyper_active or not self.running:
+                        break
+                    if crisis_type == 'crashout':
+                        do_crashout()
+                    elif crisis_type == 'nihilism':
+                        do_nihilism()
+                    elif crisis_type == 'vamp':
+                        do_vamp()
             
             token = tokens[token_index]
             

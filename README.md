@@ -42,6 +42,7 @@ A sophisticated typing simulator that mimics human behavior:
 | **Sentence Pauses** | Pauses after `.!?` with configurable frequency |
 | **Paragraph Pauses** | Pauses after newlines with configurable frequency |
 | **Special Char Delay** | Pauses 500-1500ms before typing symbols (simulates looking for keys) |
+| **Emotion Simulator** | Crashout (rage spam), Nihilism (existential phrases), Vamp (Carti lyrics) - triggers after 20%, won't happen back-to-back |
 | **Auto-Pause on Click** | Typing pauses if mouse clicked (prevents wrong location typing) |
 | **Resume** | Continue typing from exact position with 3-second countdown |
 
