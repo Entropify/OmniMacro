@@ -104,7 +104,7 @@ A sophisticated typing simulator that mimics human behavior:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/OmniMacro.git
+git clone https://github.com/Entropify/OmniMacro.git
 cd OmniMacro
 
 # Create virtual environment
@@ -126,7 +126,7 @@ pyinstaller OmniMacro.spec --noconfirm
 ## Project Structure
 
 ```
-macro-master/
+OmniMacro/
 ├── main.py           # GUI application and UI logic
 ├── macro_core.py     # Core automation engine
 ├── input_utils.py    # Low-level Windows input utilities
