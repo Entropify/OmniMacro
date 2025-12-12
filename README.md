@@ -22,7 +22,7 @@
 
 **OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single, intuitive interface with a modern, sleek theme.
 
-> ⚠️ **Important**: If certain features don't work as intended, </strong>run as administrator</strong> for full functionality.
+⚠️ **Important**: If certain features don't work as intended, </strong>run as administrator</strong> for full functionality.
 
 ---
 
