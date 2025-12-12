@@ -160,6 +160,14 @@ macro-master/
 
 ## 🎨 Screenshots
 
+<p align="center">
+  <img src="screenshots/main.png" alt="Main Interface" width="45%"/>
+  <img src="screenshots/recoil.png" alt="Recoil Control" width="45%"/>
+</p>
+<p align="center">
+  <img src="screenshots/humantyper.png" alt="Human Typer" width="90%"/>
+</p>
+
 The application features a modern **dark theme** with:
 - Clean navigation rail
 - Intuitive sliders and toggles
