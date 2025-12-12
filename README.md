@@ -35,12 +35,13 @@ A sophisticated typing simulator that mimics human behavior:
 |---------|-------------|
 | **Speed Range** | Variable WPM (10-200) for realistic variation |
 | **Typo Simulation** | Adjacent keys or random letters with auto-correction |
+| **Synonym Swap** | Types synonym first, then corrects to intended word |
 | **Correction Delay** | Configurable pause before fixing typos (20-1000ms) |
 | **Multi-Typos** | Simulate multiple consecutive errors |
 | **Thinking Pauses** | Random pauses between words (0-50% frequency) |
 | **Sentence Pauses** | Pauses after `.!?` with configurable frequency |
 | **Paragraph Pauses** | Pauses after newlines with configurable frequency |
-| **Synonym Swap** | Types synonym first, then corrects to intended word |
+
 
 > **Synonym Dictionary**: Built-in dictionary with **200+ common words** including verbs, adjectives, nouns, and adverbs.
 
