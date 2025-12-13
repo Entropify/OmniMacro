@@ -5,7 +5,7 @@
 <h1 align="center">OmniMacro</h1>
 
 <p align="center">
-  <strong>A powerful, feature-rich automation tool for Windows</strong>
+  <strong>A powerful, feature-rich automation tool for Windows (win64)</strong>
 </p>
 
 <p align="center">
