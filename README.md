@@ -5,7 +5,7 @@
 <h1 align="center">OmniMacro</h1>
 
 <p align="center">
-  <strong>A powerful, feature-rich automation tool for Windows (win64).</strong>
+  <strong>A powerful, feature-rich automation tool for Windows (win64 only, sorry ARM people).</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## Overview
 
-**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single, intuitive interface with a modern, sleek theme.
+**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single convenient executable with an intuitive interface and a modern, sleek theme.
 
 > ⚠️ **Important**: If certain features don't work as intended, </strong>run as administrator</strong> for full functionality.
 
