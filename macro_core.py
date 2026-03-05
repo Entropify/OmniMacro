@@ -27,53 +27,51 @@ class MacroCore:
 
         # Anti-AFK Settings
         self.antiafk_enabled = False
-        self.antiafk_magnitude = 50  # pixels to move
-        self.antiafk_interval = 30.0  # seconds between movements
+        self.antiafk_magnitude = 50
+        self.antiafk_interval = 30.0
 
         # Camera Spin Settings
         self.cameraspin_enabled = False
-        self.cameraspin_speed = 5  # pixels per tick
-        self.cameraspin_direction = 0  # 0 = right, 1 = left
+        self.cameraspin_speed = 5
+        self.cameraspin_direction = 0
 
         # Human Typer Settings
         self.humantyper_active = False
         self.humantyper_wpm_min = 40
         self.humantyper_wpm_max = 80
-        self.humantyper_error_rate = 2  # percentage
-        self.humantyper_correction_speed = 100  # ms delay for fixing typos
-        self.humantyper_max_typos = 1  # max consecutive typos before correction
-        self.humantyper_typo_mode = 0  # 0 = adjacent keys, 1 = random letters
-        self.humantyper_pause_min = 500  # ms min thinking pause
-        self.humantyper_pause_max = 2000  # ms max thinking pause
-        self.humantyper_pause_freq = 10  # % chance of pause at word boundary
-        self.humantyper_synonym_enabled = False  # synonym swap feature
-        self.humantyper_synonym_freq = 5  # % chance of synonym swap per word
-        # Sentence pause settings
+        self.humantyper_error_rate = 2
+        self.humantyper_correction_speed = 100
+        self.humantyper_max_typos = 1
+        self.humantyper_typo_mode = 0
+        self.humantyper_pause_min = 500
+        self.humantyper_pause_max = 2000
+        self.humantyper_pause_freq = 10
+        self.humantyper_synonym_enabled = False
+        self.humantyper_synonym_freq = 5
         self.humantyper_sentence_pause_enabled = True
-        self.humantyper_sentence_pause_freq = 80  # % chance to pause after sentence
-        self.humantyper_sentence_pause_min = 300  # ms
-        self.humantyper_sentence_pause_max = 1000  # ms
-        # Paragraph pause settings
+        self.humantyper_sentence_pause_freq = 80
+        self.humantyper_sentence_pause_min = 300
+        self.humantyper_sentence_pause_max = 1000
         self.humantyper_para_pause_enabled = True
-        self.humantyper_para_pause_freq = 90  # % chance to pause after paragraph
-        self.humantyper_para_pause_min = 500  # ms
-        self.humantyper_para_pause_max = 2000  # ms
+        self.humantyper_para_pause_freq = 90
+        self.humantyper_para_pause_min = 500
+        self.humantyper_para_pause_max = 2000
         self.humantyper_text = ""
-        self.humantyper_paused = False  # Pause state for mouse click detection
-        self.humantyper_token_index = 0  # Track position in text for resume
-        self.on_humantyper_pause = None  # Callback for pause state changes
-        self.humantyper_special_char_delay_enabled = False  # Pause before special characters
+        self.humantyper_paused = False
+        self.humantyper_token_index = 0
+        self.on_humantyper_pause = None
+        self.humantyper_special_char_delay_enabled = False
         
-        # Emotion Simulator settings
-        self.humantyper_crashout_enabled = False  # Rage typing - spam random letters
-        self.humantyper_crashout_count = 1  # Number of times to trigger
-        self.humantyper_nihilism_enabled = False  # Insert nihilistic phrases mid-typing
-        self.humantyper_nihilism_count = 1  # Number of times to trigger
-        self.humantyper_vamp_enabled = False  # Insert Playboi Carti lyrics mid-typing
-        self.humantyper_vamp_count = 1  # Number of times to trigger
+        self.humantyper_crashout_enabled = False
+        self.humantyper_crashout_count = 1
+        self.humantyper_nihilism_enabled = False
+        self.humantyper_nihilism_count = 1
+        self.humantyper_vamp_enabled = False
+        self.humantyper_vamp_count = 1
         
-        # Nihilistic phrases list - ADD YOUR OWN PHRASES HERE
-        # Each phrase will be typed out, then deleted after a pause
+        self.humantyper_typealong_enabled = False
+        self._typealong_event = threading.Event()
+        
         self.nihilism_phrases = [
             "omggggg bro i hate writing this",
             "wat even is the point of writing this",
@@ -110,10 +108,8 @@ class MacroCore:
             "50 years from now nobody will remember ts essay existed"
         ]
         
-        # Vamp Mode settings
-        self.humantyper_vamp_enabled = False  # Insert Playboi Carti lyrics mid-typing
+        self.humantyper_vamp_enabled = False
         
-        # Vamp lyrics list - ADD YOUR OWN LYRICS HERE
         self.vamp_lyrics = [
             "i told my boy go rollup ten blunts for meeee",
             "SEEEEEEYAHHHHHH",
@@ -153,13 +149,11 @@ class MacroCore:
             "what what u cannot hopin my carrrr",
             "LIKE IM TOOLIT LIKE OM GAWDDD"
             "WE AINT GOT TIMEEEE I DROPP MY DEMONS OFFFF",
-            "16 29 THROW THAT THROW THAT THROW THATTTT",
+            "16 29 THROW IT UP THROW IT UP THROW IT UPPPPPP",
             "IVE BEEN WINNING ALLDAY I NEED A PITSTOPPP"
         ]
         
-        # Synonym dictionary for word swapping (200+ common words)
         self.synonym_dict = {
-            # Common adjectives
             'good': ['great', 'nice', 'fine', 'excellent', 'wonderful', 'fantastic'],
             'bad': ['terrible', 'awful', 'poor', 'horrible', 'dreadful', 'lousy'],
             'big': ['large', 'huge', 'massive', 'enormous', 'giant', 'vast'],
@@ -225,7 +219,6 @@ class MacroCore:
             'impossible': ['unachievable', 'unfeasible', 'hopeless'],
             'real': ['genuine', 'authentic', 'actual', 'true', 'legitimate'],
             'fake': ['counterfeit', 'phony', 'bogus', 'false', 'artificial'],
-            # Common verbs
             'like': ['enjoy', 'love', 'prefer', 'appreciate', 'fancy', 'adore'],
             'want': ['need', 'desire', 'wish', 'require', 'crave', 'demand'],
             'think': ['believe', 'consider', 'feel', 'suppose', 'reckon', 'assume'],
@@ -323,7 +316,6 @@ class MacroCore:
             'exit': ['leave', 'depart', 'withdraw', 'vacate'],
             'attack': ['assault', 'strike', 'charge', 'raid', 'invade'],
             'defend': ['protect', 'guard', 'shield', 'secure', 'safeguard'],
-            # Common nouns
             'problem': ['issue', 'trouble', 'difficulty', 'challenge', 'obstacle'],
             'answer': ['response', 'reply', 'solution', 'explanation'],
             'question': ['query', 'inquiry', 'issue', 'concern'],
@@ -361,7 +353,6 @@ class MacroCore:
             'result': ['outcome', 'consequence', 'effect', 'product'],
             'success': ['achievement', 'victory', 'triumph', 'accomplishment'],
             'failure': ['defeat', 'loss', 'flop', 'disaster', 'setback'],
-            # Common adverbs
             'very': ['extremely', 'highly', 'really', 'incredibly', 'super'],
             'really': ['truly', 'genuinely', 'actually', 'indeed', 'honestly'],
             'always': ['constantly', 'forever', 'perpetually', 'continually'],
@@ -394,14 +385,11 @@ class MacroCore:
             'alone': ['solo', 'independently', 'by oneself', 'solitary'],
         }
 
-        # State
         self.mouse_pressed = False
         self.right_mouse_pressed = False
         
-        # Custom Macros
         self.custom_macros = []
         
-        # Callbacks
         self.on_recoil_toggle = None
         self.on_autoclick_toggle = None
         self.on_kb_toggle = None
@@ -413,11 +401,9 @@ class MacroCore:
         self.on_action_recorded = None
         self.is_recording_action = False
         
-        # Key state tracking for debouncing
         self.pressed_keys = set()
         self.active_macro_triggers = set()
 
-        # Threads
         self.running = True
         self.recoil_thread = threading.Thread(target=self._recoil_loop, daemon=True)
         self.autoclicker_thread = threading.Thread(target=self._autoclicker_loop, daemon=True)
@@ -425,7 +411,6 @@ class MacroCore:
         self.antiafk_thread = threading.Thread(target=self._antiafk_loop, daemon=True)
         self.cameraspin_thread = threading.Thread(target=self._cameraspin_loop, daemon=True)
         
-        # Listeners
         self.mouse_listener = mouse.Listener(on_click=self._on_click)
         self.key_listener = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
 
@@ -465,15 +450,13 @@ class MacroCore:
         self.key_listener.stop()
     
     def _release_all_keys(self):
-        # Release any keys from custom macros
         for macro in self.custom_macros:
             for sc in macro.get('actions', []):
                 try:
                     input_utils.release_key(int(sc))
                 except:
                     pass
-        # Release common modifier keys
-        common_keys = [0x1D, 0x2A, 0x36, 0x38]  # Ctrl, LShift, RShift, Alt
+        common_keys = [0x1D, 0x2A, 0x36, 0x38]
         for sc in common_keys:
             try:
                 input_utils.release_key(sc)
@@ -481,29 +464,24 @@ class MacroCore:
                 pass
 
     def _update_recoil_active(self):
-        if self.recoil_mode == 0: # LMB Only
+        if self.recoil_mode == 0:
             self.recoil_active = self.recoil_enabled and self.mouse_pressed
-        else: # LMB + RMB
+        else:
             self.recoil_active = self.recoil_enabled and self.mouse_pressed and self.right_mouse_pressed
 
     def _on_click(self, x, y, button, pressed):
         if self.is_binding and pressed:
-            # Capture Mouse Bind
-            btn_name = str(button).split('.')[-1] # "left", "right", "x1", "x2"
+            btn_name = str(button).split('.')[-1]
             if self.on_key_bound:
-                # Store as convenient dict or string, but for UI feedback string is good.
-                # The generic callback expects a name.
                 self.on_key_bound({'type': 'mouse', 'value': btn_name, 'name': f"Mouse {btn_name.title()}"})
             self.is_binding = False
             return
 
-        # Pause human typer on any mouse click (cursor may have moved)
         if pressed and self.humantyper_active and not self.humantyper_paused:
             self.humantyper_paused = True
             if self.on_humantyper_pause:
-                self.on_humantyper_pause(True)  # Notify UI that we're paused
+                self.on_humantyper_pause(True)
 
-        # Check Triggers
         if pressed and self.custom_macros:
             btn_name = str(button).split('.')[-1]
             for macro in self.custom_macros:
@@ -511,7 +489,6 @@ class MacroCore:
                 if trig and trig['type'] == 'mouse' and trig['value'] == btn_name:
                     threading.Thread(target=self.execute_custom_macro, args=(macro['id'], macro['actions'],), daemon=True).start()
         
-        # Stop macros when mouse button is released
         if not pressed and self.custom_macros:
             btn_name = str(button).split('.')[-1]
             for macro in self.custom_macros:
@@ -548,17 +525,6 @@ class MacroCore:
                     sc = input_utils.get_scan_code(vk)
                     name = key.name
                 
-                # Default behavior for single key bind (legacy KB macro support)
-                # But now we might be binding a custom macro trigger.
-                # The callback determines what to do.
-                
-                # If it's the specific KB macro binding, we update the internal key.
-                # But wait, self.kb_macro_key is specific to the "Keyboard Macro" feature.
-                # If we are binding a custom macro, we shouldn't overwrite self.kb_macro_key.
-                
-                # To distinguish, we can rely on the callback handling the data.
-                # Passing a dict gives the callback more info.
-                
                 trigger_data = {'type': 'key', 'value': sc, 'name': str(name).upper()}
                 
                 if self.on_key_bound:
@@ -570,14 +536,11 @@ class MacroCore:
                 self.is_binding = False
             return
 
-        # Check Triggers
         if self.custom_macros:
             try:
-                # Resolve SC for comparison
                 if hasattr(key, 'vk'): sc = input_utils.get_scan_code(key.vk)
                 else: sc = input_utils.get_scan_code(key.value.vk)
                 
-                # Only trigger if this key wasn't already pressed (debounce auto-repeat)
                 if sc not in self.pressed_keys:
                     self.pressed_keys.add(sc)
                     for macro in self.custom_macros:
@@ -587,39 +550,38 @@ class MacroCore:
             except:
                 pass
 
-        if key == Key.f4: # Recoil toggle
+        if key == Key.f4:
             self.recoil_enabled = not self.recoil_enabled
             self._update_recoil_active()
             if self.on_recoil_toggle:
                 self.on_recoil_toggle(self.recoil_enabled)
             return
 
-        if key == Key.f6: # Auto clicker toggle
+        if key == Key.f6:
             self.autoclicker_enabled = not self.autoclicker_enabled
             if self.on_autoclick_toggle:
                 self.on_autoclick_toggle(self.autoclicker_enabled)
             return
 
-        if key == Key.f5: # KB Macro toggle
+        if key == Key.f5:
             self.kb_macro_enabled = not self.kb_macro_enabled
             if self.on_kb_toggle:
                 self.on_kb_toggle(self.kb_macro_enabled)
             return
 
-        if key == Key.f7: # Anti-AFK toggle
+        if key == Key.f7:
             self.antiafk_enabled = not self.antiafk_enabled
             if self.on_antiafk_toggle:
                 self.on_antiafk_toggle(self.antiafk_enabled)
             return
 
-        if key == Key.f8: # Camera Spin toggle
+        if key == Key.f8:
             self.cameraspin_enabled = not self.cameraspin_enabled
             if self.on_cameraspin_toggle:
                 self.on_cameraspin_toggle(self.cameraspin_enabled)
             return
             
     def execute_custom_macro(self, macro_id, actions):
-        # Repeats actions while trigger is held
         self.active_macro_triggers.add(macro_id)
         try:
             while macro_id in self.active_macro_triggers and self.running:
@@ -628,9 +590,8 @@ class MacroCore:
                 time.sleep(0.05)
                 for sc in actions:
                     input_utils.release_key(int(sc))
-                time.sleep(0.05)  # Repeat delay
+                time.sleep(0.05)
         finally:
-            # Ensure keys are released when stopping
             for sc in actions:
                 try:
                     input_utils.release_key(int(sc))
@@ -646,7 +607,6 @@ class MacroCore:
             else: sc = input_utils.get_scan_code(key.value.vk)
             self.pressed_keys.discard(sc)
             
-            # Stop any macros triggered by this key
             for macro in self.custom_macros:
                 trig = macro.get('trigger')
                 if trig and trig['type'] == 'key' and int(trig['value']) == sc:
@@ -666,7 +626,6 @@ class MacroCore:
         was_enabled = False
         while self.running:
             if self.autoclicker_enabled:
-                # Add delay when first enabled to prevent immediate re-click
                 if not was_enabled:
                     was_enabled = True
                     time.sleep(0.5)
@@ -690,31 +649,26 @@ class MacroCore:
         import math
         while self.running:
             if self.antiafk_enabled:
-                # Generate random direction using angle
                 angle = random.uniform(0, 2 * math.pi)
                 magnitude = self.antiafk_magnitude
                 
-                # Calculate direction vector
                 dx_per_step = math.cos(angle)
                 dy_per_step = math.sin(angle)
                 
-                # Move smoothly outward with random variable speed
-                step_size = random.randint(1, 3)  # random pixels per step
+                step_size = random.randint(1, 3)
                 steps = int(magnitude / step_size)
                 
                 for _ in range(steps):
                     if not self.antiafk_enabled or not self.running:
                         break
-                    # Randomize delay for harder detection
                     delay_per_step = random.uniform(0.001, 0.005)
                     move_x = int(round(dx_per_step * step_size))
                     move_y = int(round(dy_per_step * step_size))
                     input_utils.move_relative(move_x, move_y)
                     time.sleep(delay_per_step)
                 
-                time.sleep(random.uniform(0.03, 0.08))  # random pause before returning
+                time.sleep(random.uniform(0.03, 0.08))
                 
-                # Move smoothly back with random speed
                 for _ in range(steps):
                     if not self.running:
                         break
@@ -724,7 +678,6 @@ class MacroCore:
                     input_utils.move_relative(move_x, move_y)
                     time.sleep(delay_per_step)
                 
-                # Wait for interval
                 time.sleep(self.antiafk_interval)
             else:
                 time.sleep(0.1)
@@ -732,16 +685,13 @@ class MacroCore:
     def _cameraspin_loop(self):
         while self.running:
             if self.cameraspin_enabled:
-                # Continuously move mouse horizontally (spinning camera)
-                # Direction: 0 = right (positive), 1 = left (negative)
                 direction = 1 if self.cameraspin_direction == 0 else -1
                 input_utils.move_relative(self.cameraspin_speed * direction, 0)
-                time.sleep(0.01)  # 100 ticks per second for smooth spin
+                time.sleep(0.01)
             else:
                 time.sleep(0.1)
 
 
-    # Methods for GUI to update settings
     def update_recoil(self, enabled, speed_y, speed_x, delay, mode):
         self.recoil_enabled = enabled
         self.recoil_speed_y = speed_y
@@ -769,7 +719,7 @@ class MacroCore:
         self.cameraspin_speed = speed
         self.cameraspin_direction = direction
 
-    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled, crashout_enabled, crashout_count, nihilism_enabled, nihilism_count, vamp_enabled, vamp_count):
+    def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled, crashout_enabled, crashout_count, nihilism_enabled, nihilism_count, vamp_enabled, vamp_count, typealong_enabled):
         self.humantyper_wpm_min = wpm_min
         self.humantyper_wpm_max = wpm_max
         self.humantyper_error_rate = error_rate
@@ -796,21 +746,50 @@ class MacroCore:
         self.humantyper_nihilism_count = nihilism_count
         self.humantyper_vamp_enabled = vamp_enabled
         self.humantyper_vamp_count = vamp_count
+        self.humantyper_typealong_enabled = typealong_enabled
 
     def start_humantyper(self, text):
         if self.humantyper_active:
-            return  # Already typing
+            return
         self.humantyper_text = text
-        self.humantyper_token_index = 0  # Reset position for fresh start
+        self.humantyper_token_index = 0
         self.humantyper_paused = False
         self.humantyper_active = True
         threading.Thread(target=self._humantyper_run, daemon=True).start()
+
+    def _on_typealong_keypress(self):
+        """Called by the keyboard hook when a human key is pressed during Type-Along mode."""
+        self._typealong_event.set()
+
+    def _wait_for_human_keypress(self):
+        """Wait for a human keypress event. Returns False if typer was stopped."""
+        while self.humantyper_active and self.running and not self.humantyper_paused:
+            if self._typealong_event.wait(timeout=0.1):
+                self._typealong_event.clear()
+                return True
+        return False
 
     def _humantyper_run(self):
         from pynput.keyboard import Controller as KeyboardController
         kb = KeyboardController()
         
-        # Common keyboard typo neighbors
+        # Type-Along: install keyboard hook if enabled
+        typealong_active = self.humantyper_typealong_enabled
+        if typealong_active:
+            self._typealong_event.clear()
+            input_utils.install_keyboard_hook(self._on_typealong_keypress)
+            input_utils.set_keyboard_suppression(True)
+        
+        try:
+            self._humantyper_run_inner(kb, typealong_active)
+        finally:
+            # Always clean up the hook
+            if typealong_active:
+                input_utils.set_keyboard_suppression(False)
+                input_utils.uninstall_keyboard_hook()
+
+    def _humantyper_run_inner(self, kb, typealong_active):
+        
         typo_neighbors = {
             'a': 'sqwz', 'b': 'vghn', 'c': 'xdfv', 'd': 'erfcxs', 'e': 'rdsw',
             'f': 'tgvcd', 'g': 'yhbvf', 'h': 'ujnbg', 'i': 'uojk', 'j': 'ikmnh',
@@ -821,54 +800,54 @@ class MacroCore:
         }
         
         def type_char_with_delay(char, remaining_in_word=1):
-            """Type a single character with appropriate delay and potential typos."""
-            current_wpm = random.uniform(self.humantyper_wpm_min, self.humantyper_wpm_max)
-            chars_per_minute = current_wpm * 5
-            base_delay = 60.0 / chars_per_minute
-            delay = base_delay * random.uniform(0.7, 1.3)
+            if typealong_active:
+                # In Type-Along mode: wait for human keypress before typing each character
+                if not self._wait_for_human_keypress():
+                    return  # Stopped or paused
+                # Small delay so input feels natural
+                time.sleep(random.uniform(0.01, 0.03))
+                delay = None  # No WPM-based delay in type-along mode
+            else:
+                # Normal auto-typing mode with randomized delays
+                current_wpm = random.uniform(self.humantyper_wpm_min, self.humantyper_wpm_max)
+                chars_per_minute = current_wpm * 5
+                base_delay = 60.0 / chars_per_minute
+                delay = base_delay * random.uniform(0.7, 1.3)
+                
+                if self.humantyper_special_char_delay_enabled:
+                    if char not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.!? \n':
+                        special_pause = random.uniform(0.5, 1.5)
+                        time.sleep(special_pause)
+                
+                if char in '.!?':
+                    delay += random.uniform(0.2, 0.5)
+                    if self.humantyper_sentence_pause_enabled and random.random() * 100 < self.humantyper_sentence_pause_freq:
+                        pause_time = random.uniform(
+                            self.humantyper_sentence_pause_min / 1000.0,
+                            self.humantyper_sentence_pause_max / 1000.0
+                        )
+                        time.sleep(pause_time)
+                elif char in ',;:':
+                    delay += random.uniform(0.1, 0.2)
+                elif char == '\n':
+                    if self.humantyper_para_pause_enabled and random.random() * 100 < self.humantyper_para_pause_freq:
+                        pause_time = random.uniform(
+                            self.humantyper_para_pause_min / 1000.0,
+                            self.humantyper_para_pause_max / 1000.0
+                        )
+                        time.sleep(pause_time)
+                elif char == ' ':
+                    delay += random.uniform(0.01, 0.05)
+                    if random.random() * 100 < self.humantyper_pause_freq:
+                        pause_time = random.uniform(
+                            self.humantyper_pause_min / 1000.0,
+                            self.humantyper_pause_max / 1000.0
+                        )
+                        time.sleep(pause_time)
             
-            # Special character delay - pause before characters that aren't letters, commas, or periods
-            # This simulates looking for hard-to-find symbols on the keyboard
-            if self.humantyper_special_char_delay_enabled:
-                if char not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.!? \n':
-                    special_pause = random.uniform(0.5, 1.5)  # 500-1500ms
-                    time.sleep(special_pause)
-            
-            # Add longer pause at punctuation
-            if char in '.!?':
-                delay += random.uniform(0.2, 0.5)
-                # Sentence pause
-                if self.humantyper_sentence_pause_enabled and random.random() * 100 < self.humantyper_sentence_pause_freq:
-                    pause_time = random.uniform(
-                        self.humantyper_sentence_pause_min / 1000.0,
-                        self.humantyper_sentence_pause_max / 1000.0
-                    )
-                    time.sleep(pause_time)
-            elif char in ',;:':
-                delay += random.uniform(0.1, 0.2)
-            elif char == '\n':
-                # Paragraph pause
-                if self.humantyper_para_pause_enabled and random.random() * 100 < self.humantyper_para_pause_freq:
-                    pause_time = random.uniform(
-                        self.humantyper_para_pause_min / 1000.0,
-                        self.humantyper_para_pause_max / 1000.0
-                    )
-                    time.sleep(pause_time)
-            elif char == ' ':
-                delay += random.uniform(0.01, 0.05)
-                # Thinking pause at word boundaries
-                if random.random() * 100 < self.humantyper_pause_freq:
-                    pause_time = random.uniform(
-                        self.humantyper_pause_min / 1000.0,
-                        self.humantyper_pause_max / 1000.0
-                    )
-                    time.sleep(pause_time)
-            
-            # Simulate typo based on error rate
             if random.random() * 100 < self.humantyper_error_rate:
                 lower_char = char.lower()
-                is_upper = char.isupper()  # Track if original char is uppercase
-                # Limit typos to remaining characters in word (can't make more typos than chars left)
+                is_upper = char.isupper()
                 max_possible_typos = min(self.humantyper_max_typos, remaining_in_word)
                 num_typos = random.randint(1, max(1, max_possible_typos))
                 
@@ -880,11 +859,11 @@ class MacroCore:
                             wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
                     else:
                         wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
-                    # Match case of original character
                     if is_upper:
                         wrong_char = wrong_char.upper()
                     kb.type(wrong_char)
-                    time.sleep(delay * 0.5)
+                    typo_delay = delay if delay is not None else random.uniform(0.05, 0.12)
+                    time.sleep(typo_delay * 0.5)
                 
                 correction_delay = self.humantyper_correction_speed / 1000.0
                 time.sleep(random.uniform(correction_delay * 0.5, correction_delay * 1.5))
@@ -898,36 +877,33 @@ class MacroCore:
                 kb.type(char)
             except Exception:
                 pass
-            time.sleep(delay)
+            
+            if delay is not None:
+                time.sleep(delay)
         
         def type_word(word):
-            """Type a word character by character."""
             word_len = len(word)
             for i, char in enumerate(word):
                 if not self.humantyper_active or not self.running:
                     return False
-                remaining_in_word = word_len - i  # chars left including current
+                remaining_in_word = word_len - i
                 type_char_with_delay(char, remaining_in_word)
             return True
         
         def delete_word(word_len):
-            """Delete a word by pressing backspace."""
             for _ in range(word_len):
                 kb.press(Key.backspace)
                 kb.release(Key.backspace)
                 time.sleep(random.uniform(0.08, 0.15))
         
         def do_crashout():
-            """Simulate a rage typing moment - spam random letters quickly, then delete them."""
-            # Type the prefix first
-            prefix = "omfg bro im gonna crash out "
+            prefix = " omfg bro im gonna crash out"
             for char in prefix:
                 if not self.humantyper_active or not self.running:
                     return
                 kb.type(char)
                 time.sleep(random.uniform(0.03, 0.07))
             
-            # Spam 15-40 random characters VERY fast (violent rage mode)
             num_chars = random.randint(15, 40)
             chars_typed = ""
             for _ in range(num_chars):
@@ -936,12 +912,10 @@ class MacroCore:
                 char = random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()!!')
                 chars_typed += char
                 kb.type(char)
-                time.sleep(random.uniform(0.01, 0.03))  # Extremely fast mashing
+                time.sleep(random.uniform(0.01, 0.03))
             
-            # Pause for a few seconds to "realize what happened"
             time.sleep(random.uniform(2.0, 4.0))
             
-            # Delete everything (prefix + gibberish) quickly
             total_to_delete = len(prefix) + len(chars_typed)
             for _ in range(total_to_delete):
                 kb.press(Key.backspace)
@@ -949,61 +923,51 @@ class MacroCore:
                 time.sleep(random.uniform(0.02, 0.05))
         
         def do_nihilism():
-            """Insert a nihilistic phrase, pause, then delete it."""
             if not self.nihilism_phrases:
-                return  # No phrases configured
+                return
             
             phrase = random.choice(self.nihilism_phrases)
             if not phrase:
                 return
             
-            # Go to a new line first
             kb.press(Key.enter)
             kb.release(Key.enter)
             time.sleep(random.uniform(0.1, 0.2))
             
-            # Type the nihilistic phrase
             for char in phrase:
                 if not self.humantyper_active or not self.running:
                     return
                 kb.type(char)
-                time.sleep(random.uniform(0.05, 0.12))  # Slower, deliberate typing
+                time.sleep(random.uniform(0.05, 0.12))
             
-            # Pause to "contemplate"
             time.sleep(random.uniform(1.0, 2.5))
             
-            # Delete the phrase and the newline
-            for _ in range(len(phrase) + 1):  # +1 for the newline
+            for _ in range(len(phrase) + 1):
                 kb.press(Key.backspace)
                 kb.release(Key.backspace)
                 time.sleep(random.uniform(0.04, 0.08))
         
         def do_vamp():
-            """Insert a Playboi Carti lyric, pause, then delete it."""
             if not self.vamp_lyrics:
-                return  # No lyrics configured
+                return
             
             lyric = random.choice(self.vamp_lyrics)
             if not lyric:
                 return
             
-            # Go to a new line first
             kb.press(Key.enter)
             kb.release(Key.enter)
             time.sleep(random.uniform(0.1, 0.2))
             
-            # Type the lyric
             for char in lyric:
                 if not self.humantyper_active or not self.running:
                     return
                 kb.type(char)
-                time.sleep(random.uniform(0.05, 0.12))  # Slower, deliberate typing
+                time.sleep(random.uniform(0.05, 0.12))
             
-            # Pause to vibe
             time.sleep(random.uniform(1.0, 2.5))
             
-            # Delete the lyric and the newline
-            for _ in range(len(lyric) + 1):  # +1 for the newline
+            for _ in range(len(lyric) + 1):
                 kb.press(Key.backspace)
                 kb.release(Key.backspace)
                 time.sleep(random.uniform(0.04, 0.08))
@@ -1011,24 +975,20 @@ class MacroCore:
         if self.on_humantyper_toggle:
             self.on_humantyper_toggle(True)
         
-        # Parse text into tokens (words and non-words)
         import re
         tokens = re.findall(r'\b\w+\b|[^\w]+', self.humantyper_text)
         
-        # Calculate when to trigger Emotion Simulator events
         total_tokens = len(tokens)
         crisis_triggers = []
         
-        if total_tokens > 10:  # Only trigger if text is long enough
-            trigger_start = int(total_tokens * 0.2)  # Can trigger after 20% of text
+        if total_tokens > 10:
+            trigger_start = int(total_tokens * 0.2)
             available_range = list(range(trigger_start, total_tokens))
-            min_spacing = 5  # Minimum tokens between triggers to prevent back-to-back
+            min_spacing = 5
             
-            # Collect all trigger positions with spacing
             used_positions = set()
             
             def get_spaced_positions(count, available):
-                """Get positions with minimum spacing between them."""
                 positions = []
                 remaining = available.copy()
                 for _ in range(count):
@@ -1036,54 +996,49 @@ class MacroCore:
                         break
                     pos = random.choice(remaining)
                     positions.append(pos)
-                    # Remove positions too close to this one
                     remaining = [p for p in remaining if abs(p - pos) >= min_spacing]
                 return positions
             
-            # Track all positions that will be used (for spacing between different modes)
             all_candidate_positions = available_range.copy()
             
-            # Crashout mode triggers
             if self.humantyper_crashout_enabled and self.humantyper_crashout_count > 0:
                 crashout_positions = get_spaced_positions(self.humantyper_crashout_count, all_candidate_positions)
                 for pos in crashout_positions:
                     crisis_triggers.append((pos, 'crashout'))
-                    # Remove nearby positions from candidates for other modes
                     all_candidate_positions = [p for p in all_candidate_positions if abs(p - pos) >= min_spacing]
             
-            # Nihilism mode triggers
             if self.humantyper_nihilism_enabled and self.nihilism_phrases and self.humantyper_nihilism_count > 0:
                 nihilism_positions = get_spaced_positions(self.humantyper_nihilism_count, all_candidate_positions)
                 for pos in nihilism_positions:
                     crisis_triggers.append((pos, 'nihilism'))
                     all_candidate_positions = [p for p in all_candidate_positions if abs(p - pos) >= min_spacing]
             
-            # Vamp mode triggers
             if self.humantyper_vamp_enabled and self.vamp_lyrics and self.humantyper_vamp_count > 0:
                 vamp_positions = get_spaced_positions(self.humantyper_vamp_count, all_candidate_positions)
                 for pos in vamp_positions:
                     crisis_triggers.append((pos, 'vamp'))
         
-        # Convert to a dict for quick lookup
         crisis_trigger_dict = {}
         for pos, crisis_type in crisis_triggers:
             if pos not in crisis_trigger_dict:
                 crisis_trigger_dict[pos] = []
             crisis_trigger_dict[pos].append(crisis_type)
         
-        # Start from saved token index (for resume support)
         token_index = self.humantyper_token_index
         
         while token_index < len(tokens):
-            # Check for pause - wait until resumed or stopped
             while self.humantyper_paused and self.humantyper_active and self.running:
-                self.humantyper_token_index = token_index  # Save position
-                time.sleep(0.1)  # Wait while paused
+                if typealong_active:
+                    input_utils.set_keyboard_suppression(False)
+                self.humantyper_token_index = token_index
+                time.sleep(0.1)
+            
+            if typealong_active and self.humantyper_active and self.running:
+                input_utils.set_keyboard_suppression(True)
             
             if not self.humantyper_active or not self.running:
                 break
             
-            # Check for Existential Crisis Mode triggers at this position
             if token_index in crisis_trigger_dict:
                 for crisis_type in crisis_trigger_dict[token_index]:
                     if not self.humantyper_active or not self.running:
@@ -1097,59 +1052,50 @@ class MacroCore:
             
             token = tokens[token_index]
             
-            # Check if this is a word (alphanumeric)
             if token.isalpha():
                 word_lower = token.lower()
                 
-                # Check for synonym swap
                 if (self.humantyper_synonym_enabled and 
                     word_lower in self.synonym_dict and 
                     random.random() * 100 < self.humantyper_synonym_freq):
                     
-                    # Pick a random synonym
                     synonym = random.choice(self.synonym_dict[word_lower])
                     
-                    # Preserve original case
                     if token.isupper():
                         synonym = synonym.upper()
                     elif token[0].isupper():
                         synonym = synonym.capitalize()
                     
-                    # Type the synonym first
                     if not type_word(synonym):
                         break
                     
-                    # Pause to "think" about the mistake
                     think_time = random.uniform(0.5, 1.5)
                     time.sleep(think_time)
                     
-                    # Delete the synonym
                     delete_word(len(synonym))
                     
-                    # Small pause before typing correct word
                     time.sleep(random.uniform(0.1, 0.3))
                     
-                    # Type the correct word
                     if not type_word(token):
                         break
                 else:
-                    # Normal word typing
                     if not type_word(token):
                         break
             else:
-                # Type non-word characters (spaces, punctuation, etc.)
                 for char in token:
-                    # Check for pause during character loop
                     while self.humantyper_paused and self.humantyper_active and self.running:
+                        if typealong_active:
+                            input_utils.set_keyboard_suppression(False)
                         self.humantyper_token_index = token_index
                         time.sleep(0.1)
                     if not self.humantyper_active or not self.running:
                         break
+                    if typealong_active:
+                        input_utils.set_keyboard_suppression(True)
                     type_char_with_delay(char)
             
             token_index += 1
         
-        # Reset state when done
         self.humantyper_token_index = 0
         self.humantyper_paused = False
         self.humantyper_active = False
@@ -1159,10 +1105,11 @@ class MacroCore:
             self.on_humantyper_pause(False)
 
     def resume_humantyper(self):
-        """Resume typing from where it was paused."""
         if self.humantyper_active and self.humantyper_paused:
+            if self.humantyper_typealong_enabled:
+                input_utils.set_keyboard_suppression(True)
             self.humantyper_paused = False
             if self.on_humantyper_pause:
-                self.on_humantyper_pause(False)  # Notify UI we're no longer paused
+                self.on_humantyper_pause(False)
 
 core = MacroCore()

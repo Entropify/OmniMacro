@@ -105,3 +105,163 @@ def get_key_name(sc):
     buf = ctypes.create_unicode_buffer(32)
     GetKeyNameText(lParam, buf, 32)
     return buf.value if buf.value else f"SC({sc})"
+# --- Low-Level Keyboard Hook for Type-Along ---
+import threading
+
+WH_KEYBOARD_LL = 13
+WM_KEYDOWN = 0x0100
+WM_KEYUP = 0x0101
+WM_SYSKEYDOWN = 0x0104
+WM_SYSKEYUP = 0x0105
+HC_ACTION = 0
+LLKHF_INJECTED = 0x00000010
+
+class KBDLLHOOKSTRUCT(ctypes.Structure):
+    _fields_ = [
+        ("vkCode", DWORD),
+        ("scanCode", DWORD),
+        ("flags", DWORD),
+        ("time", DWORD),
+        ("dwExtraInfo", ctypes.POINTER(DWORD)),
+    ]
+
+# Use proper 64-bit compatible types for hook API
+_user32 = ctypes.windll.user32
+_kernel32 = ctypes.windll.kernel32
+
+# GetModuleHandleW - needed for SetWindowsHookEx hMod parameter
+GetModuleHandleW = _kernel32.GetModuleHandleW
+GetModuleHandleW.argtypes = [ctypes.c_wchar_p]
+GetModuleHandleW.restype = ctypes.c_void_p
+
+SetWindowsHookExW = _user32.SetWindowsHookExW
+SetWindowsHookExW.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, DWORD]
+SetWindowsHookExW.restype = ctypes.c_void_p
+
+UnhookWindowsHookExW = _user32.UnhookWindowsHookEx
+UnhookWindowsHookExW.argtypes = [ctypes.c_void_p]
+UnhookWindowsHookExW.restype = ctypes.c_bool
+
+CallNextHookExW = _user32.CallNextHookEx
+CallNextHookExW.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.wintypes.WPARAM, ctypes.wintypes.LPARAM]
+CallNextHookExW.restype = ctypes.wintypes.LPARAM
+
+GetMessageW = _user32.GetMessageW
+PostThreadMessageW = _user32.PostThreadMessageW
+GetCurrentThreadId = _kernel32.GetCurrentThreadId
+GetLastError = _kernel32.GetLastError
+WM_QUIT = 0x0012
+
+# Use LPARAM-sized return and parameters for proper 64-bit Windows compatibility
+HOOKPROC = ctypes.WINFUNCTYPE(
+    ctypes.wintypes.LPARAM,    # LRESULT return
+    ctypes.c_int,              # int nCode
+    ctypes.wintypes.WPARAM,    # WPARAM wParam
+    ctypes.wintypes.LPARAM     # LPARAM lParam (raw pointer as integer)
+)
+
+_hook_handle = None
+_hook_thread = None
+_hook_thread_id = None
+_hook_callback_ref = None  # prevent garbage collection of the callback
+_keyboard_suppression_enabled = False
+_on_human_keypress = None
+
+def _low_level_keyboard_proc(nCode, wParam, lParam):
+    global _keyboard_suppression_enabled
+    try:
+        if nCode == HC_ACTION and wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
+            # Cast raw lParam integer to pointer to KBDLLHOOKSTRUCT
+            kb_struct = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+            is_injected = bool(kb_struct.flags & LLKHF_INJECTED)
+            
+            if not is_injected and _keyboard_suppression_enabled:
+                # Human keystroke detected while suppression is on — signal and block
+                if _on_human_keypress:
+                    _on_human_keypress()
+                return 1  # Block the keystroke
+        
+        # Also block key-up events for suppressed keys to prevent stray key-ups
+        if nCode == HC_ACTION and wParam in (WM_KEYUP, WM_SYSKEYUP):
+            kb_struct = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+            is_injected = bool(kb_struct.flags & LLKHF_INJECTED)
+            if not is_injected and _keyboard_suppression_enabled:
+                return 1  # Block the key-up too
+    except Exception as e:
+        print(f"[Type-Along] Hook callback error: {e}")
+    
+    return CallNextHookExW(_hook_handle, nCode, wParam, lParam)
+
+def install_keyboard_hook(on_keypress_callback):
+    """Install a low-level keyboard hook for Type-Along mode."""
+    global _hook_handle, _hook_thread, _hook_thread_id, _hook_callback_ref, _on_human_keypress
+    
+    if _hook_handle is not None:
+        return  # Already installed
+    
+    _on_human_keypress = on_keypress_callback
+    _hook_callback_ref = HOOKPROC(_low_level_keyboard_proc)
+    
+    ready_event = threading.Event()
+    
+    def hook_thread_func():
+        global _hook_handle, _hook_thread_id
+        _hook_thread_id = GetCurrentThreadId()
+        
+        # Get module handle for the current process
+        h_mod = GetModuleHandleW(None)
+        
+        _hook_handle = SetWindowsHookExW(
+            WH_KEYBOARD_LL,
+            _hook_callback_ref,
+            h_mod,
+            0
+        )
+        
+        if not _hook_handle:
+            err = GetLastError()
+            print(f"[Type-Along] Failed to install keyboard hook, error code: {err}")
+            ready_event.set()
+            return
+        
+        print(f"[Type-Along] Keyboard hook installed successfully (handle: {_hook_handle})")
+        ready_event.set()
+        
+        # Message pump - REQUIRED for WH_KEYBOARD_LL to receive callbacks
+        msg = ctypes.wintypes.MSG()
+        while GetMessageW(ctypes.byref(msg), None, 0, 0) != 0:
+            pass  # Just pump messages, the hook callback does the work
+        
+        # Cleanup when message loop exits
+        if _hook_handle:
+            UnhookWindowsHookExW(_hook_handle)
+            _hook_handle = None
+        print("[Type-Along] Keyboard hook uninstalled")
+    
+    _hook_thread = threading.Thread(target=hook_thread_func, daemon=True)
+    _hook_thread.start()
+    # Wait for the hook to be installed (with timeout)
+    ready_event.wait(timeout=2.0)
+
+def uninstall_keyboard_hook():
+    """Remove the low-level keyboard hook and stop the message pump."""
+    global _hook_handle, _hook_thread, _hook_thread_id, _on_human_keypress, _keyboard_suppression_enabled
+    
+    _keyboard_suppression_enabled = False
+    _on_human_keypress = None
+    
+    if _hook_thread_id is not None:
+        PostThreadMessageW(_hook_thread_id, WM_QUIT, 0, 0)
+        _hook_thread_id = None
+    
+    if _hook_thread is not None:
+        _hook_thread.join(timeout=2.0)
+        _hook_thread = None
+    
+    _hook_handle = None
+
+def set_keyboard_suppression(enabled):
+    """Toggle whether human keystrokes are suppressed (blocked). Hook must be installed first."""
+    global _keyboard_suppression_enabled
+    _keyboard_suppression_enabled = enabled
+

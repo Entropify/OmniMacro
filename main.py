@@ -474,7 +474,8 @@ def main(page: ft.Page):
             humantyper_nihilism_switch.value,
             int(humantyper_nihilism_count_input.value or 1),
             humantyper_vamp_switch.value,
-            int(humantyper_vamp_count_input.value or 1)
+            int(humantyper_vamp_count_input.value or 1),
+            humantyper_typealong_switch.value
         )
         humantyper_wpm_min_input.value = str(int(humantyper_wpm_min_slider.value))
         humantyper_wpm_max_input.value = str(int(humantyper_wpm_max_slider.value))
@@ -527,7 +528,7 @@ def main(page: ft.Page):
     )
     humantyper_wpm_min_slider = ft.Slider(min=10, max=150, divisions=28, label="{value}", value=40, on_change=on_humantyper_change, expand=True)
     humantyper_wpm_min_input = ft.TextField(value="40", width=80, on_change=on_humantyper_change)
-    humantyper_wpm_max_slider = ft.Slider(min=20, max=200, divisions=36, label="{value}", value=80, on_change=on_humantyper_change, expand=True)
+    humantyper_wpm_max_slider = ft.Slider(min=20, max=300, divisions=56, label="{value}", value=80, on_change=on_humantyper_change, expand=True)
     humantyper_wpm_max_input = ft.TextField(value="80", width=80, on_change=on_humantyper_change)
     humantyper_error_slider = ft.Slider(min=0, max=20, divisions=20, label="{value}%", value=2, on_change=on_humantyper_change, expand=True)
     humantyper_error_input = ft.TextField(value="2", width=80, on_change=on_humantyper_change, suffix_text="%")
@@ -573,6 +574,7 @@ def main(page: ft.Page):
     humantyper_nihilism_count_input = ft.TextField(value="1", width=50, on_change=on_humantyper_change, text_align=ft.TextAlign.CENTER)
     humantyper_vamp_switch = ft.Switch(label="Vamp Mode", value=False, on_change=on_humantyper_change)
     humantyper_vamp_count_input = ft.TextField(value="1", width=50, on_change=on_humantyper_change, text_align=ft.TextAlign.CENTER)
+    humantyper_typealong_switch = ft.Switch(label="Type-Along Mode", value=False, on_change=on_humantyper_change)
     humantyper_start_btn = ft.ElevatedButton(
         text="Start Typing (3s delay)",
         on_click=start_humantyper_click,
@@ -698,11 +700,18 @@ def main(page: ft.Page):
                 ft.Text("Emotion Simulator", style="titleMedium"),
                 ft.Text("Triggers after 20% of text is typed. Won't happen back-to-back.", color="grey"),
                 ft.Row([humantyper_crashout_switch, ft.Text("Times:", size=12), humantyper_crashout_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                ft.Text("Crashout: Quickly spam random letters like raging, then deletes them.", color="grey", size=11, italic=True),
+                ft.Text("Crashout: Quickly spams random letters like raging, then deletes them.", color="grey", size=11, italic=True),
                 ft.Row([humantyper_nihilism_switch, ft.Text("Times:", size=12), humantyper_nihilism_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                ft.Text("Nihilism: Type a nihilistic phrase, pause to contemplate, then deletes it.", color="grey", size=11, italic=True),
+                ft.Text("Nihilism: Types a nihilistic phrase, pause to contemplate, then deletes it.", color="grey", size=11, italic=True),
                 ft.Row([humantyper_vamp_switch, ft.Text("Times:", size=12), humantyper_vamp_count_input], vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                ft.Text("Vamp: Type random Playboi Carti lyrics when bored, then deletes them. (these lyrics are not explicit you won't get in trouble don't worry lol)", color="grey", size=11, italic=True),
+                ft.Text("Vamp: Types random Playboi Carti lyrics when bored, then deletes them. (these lyrics are not explicit you won't get in trouble don't worry lol)", color="grey", size=11, italic=True),
+                ft.Divider(),
+                ft.Text("Type-Along Mode", style="titleMedium"),
+                ft.Text("Types only while you actively press keys. Your keystrokes are blocked — only the intended text appears.", color="grey"),
+                humantyper_typealong_switch,
+                ft.Text("When enabled: each key press outputs the next character of your text. Pause pressing = typer waits.", color="grey", size=11, italic=True),
+                ft.Text("✅ Active in Type-Along: Typos & correction, Synonym Swap, Emotion Simulator (Crashout / Nihilism / Vamp)", color="#66bb6a", size=11, italic=True),
+                ft.Text("❌ Inactive in Type-Along: WPM speed, Thinking Pauses, Sentence/Paragraph Pauses, Special Char Delay", color="#ef5350", size=11, italic=True),
                 humantyper_start_btn,
                 humantyper_resume_btn,
                 humantyper_pause_text,
@@ -1026,6 +1035,9 @@ def main(page: ft.Page):
   - **Crashout**: Rage-mashes random characters, then deletes.
   - **Nihilism**: Types existential phrases, then deletes.
   - **Vamp**: Types Playboi Carti lyrics, then deletes.
+- **Type-Along Mode**: Types text only while you actively press keys. Blocks your keystrokes so only the intended text appears.
+  - ✅ **Active**: Typos & correction, Synonym Swap, Emotion Simulator (Crashout/Nihilism/Vamp)
+  - ❌ **Inactive**: WPM speed, Thinking Pauses, Sentence/Paragraph Pauses, Special Character Delay
 - **Auto-Pause on Click**: Pauses if mouse clicked to prevent wrong location.
 - **Resume/Stop**: Continue from where stopped or cancel completely.
 

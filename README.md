@@ -33,7 +33,7 @@ A sophisticated typing simulator that mimics human behavior:
 
 | Feature | Description |
 |---------|-------------|
-| **Speed Range** | Variable WPM (10-200) for realistic variation |
+| **Speed Range** | Variable WPM (10-300) for realistic variation |
 | **Typo Simulation** | Adjacent keys or random letters with auto-correction |
 | **Synonym Swap** | Types synonym first, then corrects to intended word |
 | **Correction Delay** | Configurable pause before fixing typos (20-1000ms) |
@@ -44,6 +44,7 @@ A sophisticated typing simulator that mimics human behavior:
 | **Special Char Delay** | Pauses 500-1500ms before typing symbols (simulates looking for keys) |
 | **Emotion Simulator** | Crashout (rage spam), Nihilism (existential phrases), Vamp (Carti lyrics) - triggers after 20%, won't happen back-to-back |
 | **Auto-Pause on Click** | Typing pauses if mouse clicked (prevents wrong location typing) |
+| **Type-Along Mode** | Types only while you actively press keys; keystrokes blocked so only intended text appears. Typos & Emotion Simulator remain active. |
 | **Resume** | Continue typing from exact position with 3-second countdown |
 
 
