@@ -4,6 +4,8 @@ from pynput import mouse, keyboard
 from pynput.keyboard import Key
 import input_utils
 import random
+from crosshair_overlay import CrosshairOverlay, SHAPE_CROSS
+from screen_ocr import ScreenOCR
 
 class MacroCore:
     def __init__(self):
@@ -71,6 +73,23 @@ class MacroCore:
         
         self.humantyper_typealong_enabled = False
         self._typealong_event = threading.Event()
+
+        # Crosshair Overlay Settings
+        self.crosshair_enabled = False
+        self.crosshair_shape = 0       # SHAPE_CROSS
+        self.crosshair_color = (0, 255, 0)  # Green
+        self.crosshair_size = 10
+        self.crosshair_thickness = 2
+        self.crosshair_opacity = 100
+        self.crosshair_gap = 3
+        self.crosshair_dot = True
+        self.crosshair_outline = True
+        self.crosshair_overlay = CrosshairOverlay()
+        self.on_crosshair_toggle = None
+
+        # Screen OCR
+        self.screen_ocr = ScreenOCR()
+        self.on_ocr_capture = None  # callback(text) from UI
         
         self.nihilism_phrases = [
             "omggggg bro i hate writing this",
@@ -422,14 +441,17 @@ class MacroCore:
         self.cameraspin_thread.start()
         self.mouse_listener.start()
         self.key_listener.start()
+        self.crosshair_overlay.start()
 
-    def set_callback(self, autoclick_callback, kb_callback, recoil_callback=None, antiafk_callback=None, cameraspin_callback=None, humantyper_callback=None):
+    def set_callback(self, autoclick_callback, kb_callback, recoil_callback=None, antiafk_callback=None, cameraspin_callback=None, humantyper_callback=None, crosshair_callback=None, ocr_capture_callback=None):
         self.on_autoclick_toggle = autoclick_callback
         self.on_kb_toggle = kb_callback
         self.on_recoil_toggle = recoil_callback
         self.on_antiafk_toggle = antiafk_callback
         self.on_cameraspin_toggle = cameraspin_callback
         self.on_humantyper_toggle = humantyper_callback
+        self.on_crosshair_toggle = crosshair_callback
+        self.on_ocr_capture = ocr_capture_callback
         
     def start_key_binding(self, callback):
         self.on_key_bound = callback
@@ -448,6 +470,7 @@ class MacroCore:
         self._release_all_keys()
         self.mouse_listener.stop()
         self.key_listener.stop()
+        self.crosshair_overlay.stop()
     
     def _release_all_keys(self):
         for macro in self.custom_macros:
@@ -579,6 +602,21 @@ class MacroCore:
             self.cameraspin_enabled = not self.cameraspin_enabled
             if self.on_cameraspin_toggle:
                 self.on_cameraspin_toggle(self.cameraspin_enabled)
+            return
+
+        if key == Key.f9:
+            self.crosshair_enabled = not self.crosshair_enabled
+            if self.crosshair_enabled:
+                self.crosshair_overlay.show()
+            else:
+                self.crosshair_overlay.hide()
+            if self.on_crosshair_toggle:
+                self.on_crosshair_toggle(self.crosshair_enabled)
+            return
+
+        if key == Key.f10:
+            if self.on_ocr_capture:
+                self.on_ocr_capture()
             return
             
     def execute_custom_macro(self, macro_id, actions):
@@ -713,6 +751,36 @@ class MacroCore:
         self.antiafk_enabled = enabled
         self.antiafk_magnitude = magnitude
         self.antiafk_interval = interval
+
+    def update_crosshair(self, enabled, shape=None, color=None, size=None,
+                         thickness=None, opacity=None, gap=None, dot=None, outline=None):
+        self.crosshair_enabled = enabled
+        if shape is not None:
+            self.crosshair_shape = shape
+        if color is not None:
+            self.crosshair_color = color
+        if size is not None:
+            self.crosshair_size = size
+        if thickness is not None:
+            self.crosshair_thickness = thickness
+        if opacity is not None:
+            self.crosshair_opacity = opacity
+        if gap is not None:
+            self.crosshair_gap = gap
+        if dot is not None:
+            self.crosshair_dot = dot
+        if outline is not None:
+            self.crosshair_outline = outline
+
+        self.crosshair_overlay.update_settings(
+            shape=shape, color=color, size=size,
+            thickness=thickness, opacity=opacity,
+            gap=gap, dot=dot, outline=outline
+        )
+        if enabled:
+            self.crosshair_overlay.show()
+        else:
+            self.crosshair_overlay.hide()
 
     def update_cameraspin(self, enabled, speed, direction):
         self.cameraspin_enabled = enabled

@@ -1,0 +1,72 @@
+[19:52:37.602565] OCR capture started
+[19:52:38.104984] Starting region selector
+[19:52:38.142355] Screenshot captured: 2560x1440
+[19:52:38.200339] Tkinter screen: 2048x1152
+[19:52:38.200339] Scale factors: x=1.25, y=1.25
+[19:52:38.343663] Entering tkinter mainloop
+[19:52:41.172084] Mouse press at (913, 259)
+[19:52:41.835362] Mouse release: (913,259)-(1083,297) size=170x38
+[19:52:41.836888] Crop: native (1141,323)-(1353,371)
+[19:52:41.838006] Closing overlay window
+[19:52:41.856506] Exited tkinter mainloop
+[19:52:41.858037] Region selector returned, image=present
+[19:52:42.160228] Captured image size: (212, 48), mode: RGB
+[19:52:42.163134] Running pytesseract...
+[19:52:42.290010] OCR result length: 15, preview: '07 APRIL, 2026.'
+[19:52:42.290010] Calling on_complete callback...
+[19:52:42.291044] on_complete done
+[19:52:42.292550] Capture flow finished
+[19:52:43.804180] OCR capture started
+[19:52:44.305817] Starting region selector
+[19:52:44.345778] Screenshot captured: 2560x1440
+[19:52:44.410653] Tkinter screen: 2048x1152
+[19:52:44.410653] Scale factors: x=1.25, y=1.25
+[19:52:44.504236] Entering tkinter mainloop
+[19:52:44.809799] Mouse press at (732, 168)
+[19:52:45.728992] Mouse release: (732,168)-(1234,266) size=502x98
+[19:52:45.728992] Crop: native (915,210)-(1542,332)
+[19:52:45.729996] Closing overlay window
+[19:52:45.753135] Exited tkinter mainloop
+[19:52:45.754658] Region selector returned, image=present
+[19:52:46.057037] Captured image size: (627, 122), mode: RGB
+[19:52:46.058544] Running pytesseract...
+[19:52:46.198017] OCR result length: 8, preview: 'PUSS OAD'
+[19:52:46.199021] Calling on_complete callback...
+[19:52:46.200530] on_complete done
+[19:52:46.200530] Capture flow finished
+[19:52:50.749235] OCR capture started
+[19:52:51.251606] Starting region selector
+[19:52:51.293648] Screenshot captured: 2560x1440
+[19:52:51.349931] Tkinter screen: 2048x1152
+[19:52:51.349931] Scale factors: x=1.25, y=1.25
+[19:52:51.451416] Entering tkinter mainloop
+[19:52:52.064634] Mouse press at (954, 307)
+[19:52:52.707906] Mouse release: (954,307)-(1050,336) size=96x29
+[19:52:52.707906] Crop: native (1192,383)-(1312,420)
+[19:52:52.707906] Closing overlay window
+[19:52:52.729650] Exited tkinter mainloop
+[19:52:52.732210] Region selector returned, image=present
+[19:52:53.034001] Captured image size: (120, 37), mode: RGB
+[19:52:53.034001] Running pytesseract...
+[19:52:53.154217] OCR result length: 6, preview: '= 52 -'
+[19:52:53.154826] Calling on_complete callback...
+[19:52:53.155833] on_complete done
+[19:52:53.155833] Capture flow finished
+[19:52:54.851554] OCR capture started
+[19:52:55.354407] Starting region selector
+[19:52:55.394402] Screenshot captured: 2560x1440
+[19:52:55.448370] Tkinter screen: 2048x1152
+[19:52:55.448370] Scale factors: x=1.25, y=1.25
+[19:52:55.537875] Entering tkinter mainloop
+[19:52:55.933777] Mouse press at (950, 302)
+[19:52:56.610607] Mouse release: (950,302)-(1049,338) size=99x36
+[19:52:56.611113] Crop: native (1187,377)-(1311,422)
+[19:52:56.611113] Closing overlay window
+[19:52:56.633679] Exited tkinter mainloop
+[19:52:56.636724] Region selector returned, image=present
+[19:52:56.939285] Captured image size: (124, 45), mode: RGB
+[19:52:56.939285] Running pytesseract...
+[19:52:57.047323] OCR result length: 6, preview: '= 52 -'
+[19:52:57.047323] Calling on_complete callback...
+[19:52:57.049591] on_complete done
+[19:52:57.049591] Capture flow finished

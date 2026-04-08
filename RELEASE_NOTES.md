@@ -1,22 +1,38 @@
-# OmniMacro v1.0.3 - Type-Along Mode
+# OmniMacro v1.1.0 — Crosshair Overlay + Screen OCR
 
-## ⌨️ New Feature: Type-Along Mode
+## 🎯 New Feature: Crosshair Overlay
 
-Added **Type-Along Mode** to the Human Typer — a new way to make typing look natural by tying each output character to a real keypress from the user.
+Always-on-top, click-through crosshair overlay for borderless fullscreen and windowed games.
 
-### How It Works:
-- Enable the toggle before starting the typer
-- Each key you press on your keyboard outputs the **next character** of your text
-- Your actual keystrokes are **suppressed** — only the intended text appears
-- Stop pressing keys and the typer **waits** until you resume
+- **Shapes**: Cross, Circle, Dot, Cross+Circle, Cross+Dot
+- **Colors**: Green, Red, Cyan, White, Yellow, Magenta, Orange, or custom RGB
+- **Settings**: Size (2-50px), Thickness (1-5px), Opacity (10-100%), Center Gap (0-20px)
+- **Extras**: Center Dot toggle, Dark Outline toggle
+- **Hotkey**: `F9` to toggle on/off
 
-### What's Active in Type-Along Mode:
-- ✅ **Typos & auto-correction** — error rate and correction speed settings fully apply
-- ✅ **Synonym Swap** — still fires based on configured frequency
-- ✅ **Emotion Simulator** (Crashout / Nihilism / Vamp) — triggers as normal
-- ❌ **WPM speed, Thinking/Sentence/Paragraph Pauses, Special Char Delay** — bypassed (pacing is driven by your keystrokes instead)
+## 📷 New Feature: Screen OCR (Text Capture)
+
+Capture any region of the screen and extract text using OCR — all from within OmniMacro.
+
+- Click **Capture Region** or press **F10** — the app minimizes for a clean screenshot
+- Screen dims with a crosshair cursor — click and drag to select a region
+- Extracted text appears in an **editable output box**, allowing you to tweak text before copying
+- **Capture History** stores the last 20 captures with timestamps
+- Press **ESC** or right-click to cancel safely without stalling the app
+- Tesseract OCR engine is **bundled in the exe** — no separate install needed for end users
+
+## 🐛 Bug Fixes
+
+- **Fixed**: Crosshair overlay opacity slider now actually works — previously the opacity value was stored but never applied to the Win32 window
+- **Fixed**: Resolved massive Flet UI freeze crashes by surgically decoupling Tkinter Screen Capture from Windows DPI injections
+- **Fixed**: OCR executable compile now properly maps the internal `TESSDATA_PREFIX` to the bundled `tessdata` subfolder meaning compiled executables actually read text correctly instead of crashing silently
+- **Fixed**: Screen capture correctly handles `ESC` and mouse clicks natively freeing the app from getting stuck in a "capturing" state if abruptly closed
 
 ## 📝 Other Changes
-- UI description below the Type-Along switch now lists active/inactive parameters clearly (green ✅ / red ❌)
-- Info page entry updated with matching active/inactive breakdown
-- WPM max corrected to 300 in README
+
+- New **OCR** tab in the sidebar navigation
+- Updated Info page with Crosshair Overlay and Screen OCR feature cards
+- Added `pytesseract` and `Pillow` to dependencies
+- Updated build config to bundle Tesseract binary + English training data into the single exe
+- README updated with new features, hotkeys, build instructions, and project structure
+- **Exe size is now ~170 MB** (up from ~80 MB) — Tesseract OCR and its dependencies (ICU unicode libraries, Leptonica image processing, etc.) are fully bundled so the OCR feature works out-of-the-box with no separate installs for end users

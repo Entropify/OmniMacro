@@ -5,7 +5,7 @@
 <h1 align="center">OmniMacro</h1>
 
 <p align="center">
-  <strong>A powerful, feature-rich automation tool for Windows (win64 only, sorry ARM people).</strong>
+  <strong>A powerful, feature-rich automation tool for Windows</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## Overview
 
-**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single convenient executable with an intuitive interface and a modern, sleek theme.
+**OmniMacro** is a comprehensive Windows automation utility designed for power users and those who want to save effort and time on daily tasks. It combines multiple automation features into a single, intuitive interface with a modern, sleek theme.
 
 > ⚠️ **Important**: If certain features don't work as intended, </strong>run as administrator</strong> for full functionality.
 
@@ -85,6 +85,25 @@ A sophisticated typing simulator that mimics human behavior:
 - **Hold-to-repeat** functionality
 - **Persistent storage** - macros saved across sessions
 
+### Crosshair Overlay
+- **Always-on-top** transparent overlay — works over borderless fullscreen and windowed apps
+- **Click-through** — crosshair is fully transparent to mouse clicks
+- **Shapes**: Cross, Circle, Dot, Cross+Circle, Cross+Dot
+- **Color presets** (Green, Red, Cyan, White, Yellow, Magenta, Orange) or **custom RGB**
+- **Adjustable**: Size (2-50px), Thickness (1-5px), Opacity (10-100%), Gap (0-20px)
+- **Center Dot** and **Dark Outline** toggles for visibility
+- **Hotkey**: `F9`
+
+### Screen OCR (Text Capture)
+- **Region capture** — click and drag to select any area of the screen
+- **OCR text extraction** using Tesseract OCR (bundled in the exe)
+- **Editable Output Box** — extracted text populates a modifiable text area for quick edits before copying
+- **Copy to clipboard** with one click
+- **Capture history** — last 20 captures stored with timestamps
+- **Dimmed overlay** with instructions during capture
+- **Cancel** with ESC or right-click
+- **Hotkey**: `F10`
+
 ---
 
 ## Tech Stack
@@ -94,6 +113,8 @@ A sophisticated typing simulator that mimics human behavior:
 | **Language** | Python 3.12+ |
 | **GUI Framework** | [Flet](https://flet.dev/) (Flutter-based) |
 | **Input Handling** | [pynput](https://pypi.org/project/pynput/) |
+| **OCR Engine** | [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (bundled) |
+| **Image Processing** | [Pillow](https://python-pillow.org/) |
 | **Packaging** | [PyInstaller](https://pyinstaller.org/) |
 | **OS Integration** | Windows API (ctypes) |
 
@@ -119,12 +140,21 @@ venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Install Tesseract OCR (required for Screen OCR feature and building the exe)
+# Download from: https://github.com/UB-Mannheim/tesseract/wiki
+# Or via winget:
+winget install UB-Mannheim.TesseractOCR
+
 # Run directly
 python main.py
 
-# Or build executable
+# Or build executable (Tesseract is automatically bundled into the exe)
 pyinstaller OmniMacro.spec --noconfirm
 ```
+
+> **Note for developers**: Tesseract OCR must be installed on your build machine (default: `C:\Program Files\Tesseract-OCR\`). The spec file auto-detects it and bundles the binary + English training data into the single exe. End users do **not** need to install Tesseract separately.
+
+> **Exe size**: The compiled `.exe` is ~170 MB (up from ~80 MB) because Tesseract OCR and its dependencies (ICU unicode libraries, Leptonica image processing, etc.) are fully bundled. This ensures the OCR feature works out-of-the-box with no separate installs needed.
 
 ---
 
@@ -132,15 +162,17 @@ pyinstaller OmniMacro.spec --noconfirm
 
 ```
 OmniMacro/
-├── main.py           # GUI application and UI logic
-├── macro_core.py     # Core automation engine
-├── input_utils.py    # Low-level Windows input utilities
-├── OmniMacro.spec    # PyInstaller build configuration
-├── requirements.txt  # Python dependencies
+├── main.py              # GUI application and UI logic
+├── macro_core.py        # Core automation engine
+├── input_utils.py       # Low-level Windows input utilities
+├── crosshair_overlay.py # Win32 crosshair overlay window
+├── screen_ocr.py        # Screen region capture and OCR
+├── OmniMacro.spec       # PyInstaller build configuration
+├── requirements.txt     # Python dependencies
 ├── assets/
-│   └── icon.ico      # Application icon
+│   └── icon.ico         # Application icon
 └── dist/
-    └── OmniMacro.exe # Compiled executable
+    └── OmniMacro.exe    # Compiled executable
 ```
 
 ---
@@ -162,6 +194,8 @@ OmniMacro/
 | `F6` | Toggle Auto Clicker |
 | `F7` | Toggle Anti-AFK |
 | `F8` | Toggle Camera Spin |
+| `F9` | Toggle Crosshair Overlay |
+| `F10` | Capture Screen Region (OCR) |
 
 ---
 
@@ -208,6 +242,7 @@ limitations under the License.
 ## Credits & Acknowledgments
 
 - **[Final-Typer](https://github.com/Peteryhs/Final-Typer)** by Peteryhs - Inspiration for the Human Typer feature
+- **[Tesseract OCR](https://github.com/tesseract-ocr/tesseract)** - Open-source OCR engine
 - **[Flet](https://flet.dev/)** - Modern Python UI framework
 - **[pynput](https://pynput.readthedocs.io/)** - Cross-platform input control
 

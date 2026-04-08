@@ -1,3 +1,5 @@
 flet
 pynput
 pyinstaller
+pytesseract
+Pillow

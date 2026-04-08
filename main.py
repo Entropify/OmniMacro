@@ -9,6 +9,8 @@ import uuid
 import ctypes
 import input_utils
 from macro_core import core
+from crosshair_overlay import SHAPE_CROSS, SHAPE_CIRCLE, SHAPE_DOT, SHAPE_CROSS_CIRCLE, SHAPE_CROSS_DOT
+from screen_ocr import get_tesseract_status, is_tesseract_available
 
 def main(page: ft.Page):
     # Set AppUserModelID to ensure taskbar icon works on Windows
@@ -319,6 +321,11 @@ def main(page: ft.Page):
         cameraspin_switch.value = state
         page.update()
     
+    # Callback for F9 toggle (Crosshair)
+    def update_crosshair_switch(state):
+        crosshair_switch.value = state
+        page.update()
+    
     # Callback for Human Typer status
     def update_humantyper_status(state):
         if state:
@@ -351,7 +358,11 @@ def main(page: ft.Page):
                 humantyper_start_btn.bgcolor = "#ef5350"
         page.update()
     
-    core.set_callback(update_autoclick_switch, update_kb_switch, update_recoil_switch, update_antiafk_switch, update_cameraspin_switch, update_humantyper_status)
+    # OCR capture callback (F10 hotkey triggers this)
+    def trigger_ocr_from_hotkey():
+        start_ocr_capture(None)
+
+    core.set_callback(update_autoclick_switch, update_kb_switch, update_recoil_switch, update_antiafk_switch, update_cameraspin_switch, update_humantyper_status, update_crosshair_switch, trigger_ocr_from_hotkey)
     core.on_humantyper_pause = update_humantyper_pause
 
     autoclick_content = ft.Column([
@@ -999,6 +1010,247 @@ def main(page: ft.Page):
     # Populate list from loaded macros
     refresh_macro_list()
 
+    # --- Crosshair Overlay Controls ---
+    SHAPE_NAMES = ["Cross", "Circle", "Dot", "Cross + Circle", "Cross + Dot"]
+    COLOR_PRESETS = {
+        "Green": (0, 255, 0),
+        "Red": (255, 0, 0),
+        "Cyan": (0, 255, 255),
+        "White": (255, 255, 255),
+        "Yellow": (255, 255, 0),
+        "Magenta": (255, 0, 255),
+        "Orange": (255, 165, 0),
+        "Custom": None,
+    }
+
+    def on_crosshair_change(e=None):
+        # Determine color from dropdown or custom RGB
+        color_name = crosshair_color_dropdown.value or "Green"
+        if color_name == "Custom":
+            try:
+                r = int(crosshair_r_input.value or 0)
+                g = int(crosshair_g_input.value or 255)
+                b = int(crosshair_b_input.value or 0)
+                color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
+            except ValueError:
+                color = (0, 255, 0)
+            crosshair_rgb_row.visible = True
+        else:
+            color = COLOR_PRESETS.get(color_name, (0, 255, 0))
+            crosshair_rgb_row.visible = False
+
+        # Update all input displays
+        crosshair_size_input.value = str(int(crosshair_size_slider.value))
+        crosshair_thickness_input.value = str(int(crosshair_thickness_slider.value))
+        crosshair_opacity_input.value = str(int(crosshair_opacity_slider.value))
+        crosshair_gap_input.value = str(int(crosshair_gap_slider.value))
+
+        core.update_crosshair(
+            crosshair_switch.value,
+            shape=SHAPE_NAMES.index(crosshair_shape_dropdown.value) if crosshair_shape_dropdown.value else 0,
+            color=color,
+            size=int(crosshair_size_slider.value),
+            thickness=int(crosshair_thickness_slider.value),
+            opacity=int(crosshair_opacity_slider.value),
+            gap=int(crosshair_gap_slider.value),
+            dot=crosshair_dot_switch.value,
+            outline=crosshair_outline_switch.value,
+        )
+        page.update()
+
+    crosshair_switch = ft.Switch(label="Enable Crosshair Overlay", on_change=on_crosshair_change)
+
+    crosshair_shape_dropdown = ft.Dropdown(
+        label="Shape",
+        value="Cross",
+        options=[ft.dropdown.Option(name) for name in SHAPE_NAMES],
+        on_change=on_crosshair_change,
+        width=200,
+    )
+
+    crosshair_color_dropdown = ft.Dropdown(
+        label="Color",
+        value="Green",
+        options=[ft.dropdown.Option(name) for name in COLOR_PRESETS.keys()],
+        on_change=on_crosshair_change,
+        width=200,
+    )
+
+    crosshair_r_input = ft.TextField(value="0", width=70, label="R", on_change=on_crosshair_change, text_align=ft.TextAlign.CENTER)
+    crosshair_g_input = ft.TextField(value="255", width=70, label="G", on_change=on_crosshair_change, text_align=ft.TextAlign.CENTER)
+    crosshair_b_input = ft.TextField(value="0", width=70, label="B", on_change=on_crosshair_change, text_align=ft.TextAlign.CENTER)
+    crosshair_rgb_row = ft.Row([crosshair_r_input, crosshair_g_input, crosshair_b_input], visible=False, spacing=5)
+
+    crosshair_size_slider = ft.Slider(min=2, max=50, divisions=48, label="{value} px", value=10, on_change=on_crosshair_change, expand=True)
+    crosshair_size_input = ft.TextField(value="10", width=80, on_change=on_crosshair_change, suffix_text="px")
+
+    crosshair_thickness_slider = ft.Slider(min=1, max=5, divisions=4, label="{value} px", value=2, on_change=on_crosshair_change, expand=True)
+    crosshair_thickness_input = ft.TextField(value="2", width=80, on_change=on_crosshair_change, suffix_text="px")
+
+    crosshair_opacity_slider = ft.Slider(min=10, max=100, divisions=18, label="{value}%", value=100, on_change=on_crosshair_change, expand=True)
+    crosshair_opacity_input = ft.TextField(value="100", width=80, on_change=on_crosshair_change, suffix_text="%")
+
+    crosshair_gap_slider = ft.Slider(min=0, max=20, divisions=20, label="{value} px", value=3, on_change=on_crosshair_change, expand=True)
+    crosshair_gap_input = ft.TextField(value="3", width=80, on_change=on_crosshair_change, suffix_text="px")
+
+    crosshair_dot_switch = ft.Switch(label="Center Dot", value=True, on_change=on_crosshair_change)
+    crosshair_outline_switch = ft.Switch(label="Dark Outline", value=True, on_change=on_crosshair_change)
+
+    crosshair_content = ft.Column([
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Crosshair Overlay", style="headlineMedium"),
+                ft.Text("Always-on-top crosshair. Works over borderless fullscreen and windowed apps.", color="grey"),
+                crosshair_switch,
+                ft.Text("Activation: Press 'F9' to Toggle ON/OFF", color="grey"),
+                ft.Divider(),
+                ft.Text("Appearance", style="titleMedium"),
+                ft.Row([crosshair_shape_dropdown, crosshair_color_dropdown], spacing=15),
+                crosshair_rgb_row,
+                ft.Text("Size (arm length / radius)"),
+                ft.Row([crosshair_size_slider, crosshair_size_input], alignment="spaceBetween"),
+                ft.Text("Thickness"),
+                ft.Row([crosshair_thickness_slider, crosshair_thickness_input], alignment="spaceBetween"),
+                ft.Text("Opacity"),
+                ft.Row([crosshair_opacity_slider, crosshair_opacity_input], alignment="spaceBetween"),
+                ft.Divider(),
+                ft.Text("Details", style="titleMedium"),
+                ft.Text("Center Gap (space between center and arm start, for Cross shapes)"),
+                ft.Row([crosshair_gap_slider, crosshair_gap_input], alignment="spaceBetween"),
+                crosshair_dot_switch,
+                crosshair_outline_switch,
+                ft.Divider(),
+                ft.Text("ℹ️ The overlay uses a native Win32 transparent window. It stays above all apps including borderless fullscreen games.", color="grey", size=11, italic=True),
+                ft.Text("⚠️ Exclusive fullscreen (rare) may hide the overlay — most modern games use borderless fullscreen by default.", color="#ffa726", size=11, italic=True),
+            ], spacing=8),
+            padding=ft.padding.only(right=15)
+        )
+    ], scroll="auto", expand=True)
+
+    # --- Screen OCR Controls ---
+    ocr_output_field = ft.TextField(
+        label="Captured Text",
+        multiline=True,
+        min_lines=6,
+        max_lines=12,
+        value="",
+    )
+
+    ocr_status_text = ft.Text(get_tesseract_status(), size=11, italic=True,
+                              color="#66bb6a" if is_tesseract_available() else "#ef5350")
+    ocr_history_list = ft.ListView(expand=True, spacing=5)
+
+    def start_ocr_capture(e):
+        """Trigger the OCR capture flow."""
+        ocr_capture_btn.text = "Capturing..."
+        ocr_capture_btn.disabled = True
+        page.update()
+
+        def on_ocr_complete(text):
+            ocr_output_field.value = text
+            ocr_capture_btn.text = "Capture Region (F10)"
+            ocr_capture_btn.disabled = False
+            _refresh_ocr_history()
+            page.update()
+
+        def on_ocr_error(error):
+            ocr_output_field.value = ""
+            ocr_capture_btn.text = "Capture Region (F10)"
+            ocr_capture_btn.disabled = False
+            page.snack_bar = ft.SnackBar(ft.Text(error))
+            page.snack_bar.open = True
+            page.update()
+
+        def on_ocr_cancel():
+            ocr_capture_btn.text = "Capture Region (F10)"
+            ocr_capture_btn.disabled = False
+            page.update()
+
+        def minimize_app():
+            page.window.minimized = True
+            page.update()
+
+        def restore_app():
+            page.window.minimized = False
+            page.update()
+
+        core.screen_ocr.capture_and_ocr(
+            on_complete=on_ocr_complete,
+            on_error=on_ocr_error,
+            on_cancel=on_ocr_cancel,
+            minimize_window=minimize_app,
+            restore_window=restore_app,
+        )
+
+    def copy_ocr_text(e):
+        text = ocr_output_field.value
+        if text:
+            page.set_clipboard(text)
+            page.snack_bar = ft.SnackBar(ft.Text("Copied to clipboard!"))
+            page.snack_bar.open = True
+            page.update()
+
+    def clear_ocr_history(e):
+        core.screen_ocr.clear_history()
+        ocr_output_field.value = ""
+        _refresh_ocr_history()
+        page.update()
+
+    def _refresh_ocr_history():
+        ocr_history_list.controls.clear()
+        for ts, text in core.screen_ocr.history:
+            preview = text[:80].replace('\n', ' ')
+            if len(text) > 80:
+                preview += "..."
+            ocr_history_list.controls.append(
+                ft.ListTile(
+                    leading=ft.Icon("schedule", size=16, color="grey"),
+                    title=ft.Text(preview, size=13, max_lines=1),
+                    subtitle=ft.Text(ts, size=11, color="grey"),
+                    on_click=lambda e, t=text: _select_history_item(t),
+                    dense=True,
+                )
+            )
+
+    def _select_history_item(text):
+        ocr_output_field.value = text
+        page.update()
+
+    ocr_capture_btn = ft.ElevatedButton(
+        text="Capture Region (F10)",
+        icon="crop_free",
+        on_click=start_ocr_capture,
+        bgcolor="#616161",
+        color="white",
+        height=45,
+        style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)),
+    )
+    ocr_copy_btn = ft.ElevatedButton(text="Copy Text", icon="content_copy", on_click=copy_ocr_text)
+    ocr_clear_btn = ft.ElevatedButton(text="Clear History", icon="delete_sweep", on_click=clear_ocr_history)
+
+    ocr_content = ft.Column([
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Screen OCR", style="headlineMedium"),
+                ft.Text("Capture a region of the screen and extract text using OCR.", color="grey"),
+                ocr_status_text,
+                ft.Divider(),
+                ocr_capture_btn,
+                ft.Text("Hotkey: Press 'F10' to capture", color="grey", size=12),
+                ocr_output_field,
+                ft.Row([ocr_copy_btn, ocr_clear_btn], spacing=10),
+                ft.Divider(),
+                ft.Text("Capture History", style="titleMedium"),
+                ft.Text("Click an entry to view its text.", color="grey", size=11),
+                ft.Container(content=ocr_history_list, height=200),
+                ft.Divider(),
+                ft.Text("ℹ️ The app minimizes itself during capture to get a clean screenshot. Select a region by clicking and dragging.", color="grey", size=11, italic=True),
+                ft.Text("⚠️ OCR accuracy depends on text clarity, font size, and contrast. Best results on clean, readable text.", color="#ffa726", size=11, italic=True),
+            ], spacing=8),
+            padding=ft.padding.only(right=15),
+        )
+    ], scroll="auto", expand=True)
+
     # --- Info Controls ---
     feature_cards = []  # Store cards for theme toggle updates
     
@@ -1083,6 +1335,20 @@ def main(page: ft.Page):
 - **Edit/Delete**: Use buttons next to each macro.
 """
 
+    crosshair_info = """
+- **Activation**: Toggle switch or press **F9**.
+- **Always on Top**: Overlay stays above all windows, including borderless fullscreen games.
+- **Click-Through**: The crosshair is fully transparent to mouse clicks.
+- **Shapes**: Cross, Circle, Dot, Cross+Circle, Cross+Dot.
+- **Color**: Preset colors (Green, Red, Cyan, White, Yellow, Magenta, Orange) or custom RGB.
+- **Size**: Adjustable arm length / circle radius (2-50 px).
+- **Thickness**: Line width (1-5 px).
+- **Opacity**: Overlay transparency (10-100%).
+- **Gap**: Center gap for cross shapes (0-20 px).
+- **Center Dot**: Optional dot at the exact center.
+- **Outline**: Dark outline for visibility on any background.
+"""
+
     humantyper_card = create_feature_card("Human Typer", humantyper_info)
     recoil_card = create_feature_card("Recoil Control", recoil_info)
     keyboard_card = create_feature_card("Keyboard Macro", keyboard_info)
@@ -1090,7 +1356,18 @@ def main(page: ft.Page):
     antiafk_card = create_feature_card("Anti-AFK", antiafk_info)
     cameraspin_card = create_feature_card("Camera Spin", cameraspin_info)
     custommacro_card = create_feature_card("Custom Macros", custommacro_info)
-    
+    crosshair_card = create_feature_card("Crosshair Overlay", crosshair_info)
+
+    ocr_info = """
+- **Activation**: Click **Capture Region** button or press **F10**.
+- **Region Select**: App minimizes, screen dims — click and drag to select area.
+- **Text Extraction**: Uses Tesseract OCR to read text from the selected region.
+- **Copy**: Extracted text displayed in output box — click Copy to clipboard.
+- **History**: Last 20 captures stored, click any entry to re-view.
+- **Cancel**: Press **ESC** or right-click to cancel capture.
+"""
+    ocr_card = create_feature_card("Screen OCR", ocr_info)
+
     important_card = ft.Container(
         content=ft.Row([
             ft.Icon("warning", color="#c62828", size=30),
@@ -1167,6 +1444,8 @@ def main(page: ft.Page):
                 antiafk_card,
                 cameraspin_card,
                 custommacro_card,
+                crosshair_card,
+                ocr_card,
             ], spacing=10),
             padding=ft.padding.only(right=15)
         )
@@ -1204,6 +1483,10 @@ def main(page: ft.Page):
             switcher.content = antiafk_content
         elif idx == 6:
             switcher.content = custom_macro_content
+        elif idx == 7:
+            switcher.content = crosshair_content
+        elif idx == 8:
+            switcher.content = ocr_content
         page.update()
 
     rail = ft.NavigationRail(
@@ -1233,6 +1516,12 @@ def main(page: ft.Page):
             ),
             ft.NavigationRailDestination(
                 icon="extension", selected_icon="extension_outlined", label="Custom"
+            ),
+            ft.NavigationRailDestination(
+                icon="gps_fixed", selected_icon="gps_fixed", label="Crosshair"
+            ),
+            ft.NavigationRailDestination(
+                icon="document_scanner", selected_icon="document_scanner", label="OCR"
             ),
         ],
         on_change=on_nav_change,
