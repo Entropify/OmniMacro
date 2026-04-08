@@ -12,6 +12,12 @@
   <img src="https://img.shields.io/badge/Platform-Windows-blue?logo=windows" alt="Platform"/>
   <img src="https://img.shields.io/badge/Python-3.12+-yellow?logo=python&logoColor=white" alt="Python"/>
   <img src="https://img.shields.io/badge/GUI-Flet-purple" alt="Flet"/>
+  <br/>
+  <img src="https://img.shields.io/badge/OCR-Tesseract-orange" alt="Tesseract OCR"/>
+  <img src="https://img.shields.io/badge/Input-pynput-green" alt="Pynput"/>
+  <img src="https://img.shields.io/badge/Imaging-Pillow-yellowgreen" alt="Pillow"/>
+  <img src="https://img.shields.io/badge/Build-PyInstaller-lightgrey" alt="PyInstaller"/>
+  <br/>
   <img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="License"/>
   <img src="https://img.shields.io/badge/Status-Active-success" alt="Status"/>
 </p>
