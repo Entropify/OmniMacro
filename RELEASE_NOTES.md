@@ -1,38 +1,22 @@
-# OmniMacro v1.1.0 — Crosshair Overlay + Screen OCR
+# OmniMacro v1.1.1 — Color Clicker
 
-## 🎯 New Feature: Crosshair Overlay
+## 🎨 New Feature: Color Clicker
 
-Always-on-top, click-through crosshair overlay for borderless fullscreen and windowed games.
+Monitors a user-defined screen region and automatically left-clicks the mouse when a target color is detected within it.
 
-- **Shapes**: Cross, Circle, Dot, Cross+Circle, Cross+Dot
-- **Colors**: Green, Red, Cyan, White, Yellow, Magenta, Orange, or custom RGB
-- **Settings**: Size (2-50px), Thickness (1-5px), Opacity (10-100%), Center Gap (0-20px)
-- **Extras**: Center Dot toggle, Dark Outline toggle
-- **Hotkey**: `F9` to toggle on/off
-
-## 📷 New Feature: Screen OCR (Text Capture)
-
-Capture any region of the screen and extract text using OCR — all from within OmniMacro.
-
-- Click **Capture Region** or press **F10** — the app minimizes for a clean screenshot
-- Screen dims with a crosshair cursor — click and drag to select a region
-- Extracted text appears in an **editable output box**, allowing you to tweak text before copying
-- **Capture History** stores the last 20 captures with timestamps
-- Press **ESC** or right-click to cancel safely without stalling the app
-- Tesseract OCR engine is **bundled in the exe** — no separate install needed for end users
-
-## 🐛 Bug Fixes
-
-- **Fixed**: Crosshair overlay opacity slider now actually works — previously the opacity value was stored but never applied to the Win32 window
-- **Fixed**: Resolved massive Flet UI freeze crashes by surgically decoupling Tkinter Screen Capture from Windows DPI injections
-- **Fixed**: OCR executable compile now properly maps the internal `TESSDATA_PREFIX` to the bundled `tessdata` subfolder meaning compiled executables actually read text correctly instead of crashing silently
-- **Fixed**: Screen capture correctly handles `ESC` and mouse clicks natively freeing the app from getting stuck in a "capturing" state if abruptly closed
+- Click **Select Region** to draw a rectangle over any area of the screen — the app minimizes first for a clean view
+- Use the **Eyedropper** to pick any pixel color from a full-screen overlay with a live magnifying glass
+- Or type a **Hex code** (`#RRGGBB`) directly — the color swatch updates in real time, two-way synced with the eyedropper
+- **Color Tolerance** slider (0–150) lets you match loosely or exactly using Euclidean RGB distance
+- **Pre-Click Delay** (0–5000ms) — wait a configurable time after detecting the color before clicking
+- **Scan Interval** (10–1000ms) — control how often the region is sampled; lower = more responsive, more CPU
+- Built-in **300ms cooldown** between clicks prevents unintended spam
+- **Hotkey**: `F11` to toggle on/off
 
 ## 📝 Other Changes
 
-- New **OCR** tab in the sidebar navigation
-- Updated Info page with Crosshair Overlay and Screen OCR feature cards
-- Added `pytesseract` and `Pillow` to dependencies
-- Updated build config to bundle Tesseract binary + English training data into the single exe
-- README updated with new features, hotkeys, build instructions, and project structure
-- **Exe size is now ~170 MB** (up from ~80 MB) — Tesseract OCR and its dependencies (ICU unicode libraries, Leptonica image processing, etc.) are fully bundled so the OCR feature works out-of-the-box with no separate installs for end users
+- New **Color Click** tab in the sidebar navigation (icon: color dropper)
+- New `color_picker_overlay.py` module — houses both the region selector and eyedropper Tkinter overlays
+- Updated Info page with a Color Clicker feature card
+- Updated hotkey reference: `F11` → Toggle Color Clicker
+- README updated with new feature section, Tkinter badge, updated tech stack table, project structure, and hotkey reference

@@ -1,0 +1,194 @@
+﻿.\venv\Scripts\python.exe : 145 INFO: PyInstaller: 
+6.17.0, contrib hooks: 2025.10
+At line:1 char:1
++ .\venv\Scripts\python.exe -m PyInstaller 
+OmniMacro.spec --distpath di ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (145 INFO:  
+   PyIns... hooks: 2025.10:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+145 INFO: Python: 3.12.6
+166 INFO: Platform: Windows-11-10.0.26200-SP0
+167 INFO: Python environment: C:\OmniMacro Dev\venv
+170 INFO: Module search paths (PYTHONPATH):
+['C:\\OmniMacro Dev',
+ 'C:\\Users\\jzyra\\AppData\\Local\\Programs\\Python\\Py
+thon312\\python312.zip',
+ 'C:\\Users\\jzyra\\AppData\\Local\\Programs\\Python\\Py
+thon312\\DLLs',
+ 'C:\\Users\\jzyra\\AppData\\Local\\Programs\\Python\\Py
+thon312\\Lib',
+ 'C:\\Users\\jzyra\\AppData\\Local\\Programs\\Python\\Py
+thon312',
+ 'C:\\OmniMacro Dev\\venv',
+ 'C:\\OmniMacro Dev\\venv\\Lib\\site-packages',
+ 'C:\\OmniMacro Dev']
+384 INFO: Appending 'binaries' from .spec
+385 INFO: Appending 'datas' from .spec
+385 INFO: checking Analysis
+401 INFO: Building because C:\OmniMacro Dev\main.py 
+changed
+401 INFO: Looking for Python shared library...
+402 INFO: Using Python shared library: C:\Users\jzyra\Ap
+pData\Local\Programs\Python\Python312\python312.dll
+402 INFO: Running Analysis Analysis-00.toc
+402 INFO: Target bytecode optimization level: 0
+402 INFO: Initializing module dependency graph...
+403 INFO: Initializing module graph hook caches...
+413 INFO: Analyzing modules for base_library.zip ...
+1255 INFO: Processing standard module hook 
+'hook-encodings.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+1649 INFO: Processing standard module hook 
+'hook-heapq.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+2193 INFO: Processing standard module hook 
+'hook-pickle.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+3049 INFO: Caching module dependency graph...
+3072 INFO: Analyzing C:\OmniMacro Dev\main.py
+3113 INFO: Processing standard module hook 
+'hook-flet.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\flet_cli\\__pyinstaller'
+3648 INFO: Processing standard module hook 
+'hook-multiprocessing.util.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+3745 INFO: Processing standard module hook 
+'hook-xml.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+3881 INFO: Processing standard module hook 
+'hook-_ctypes.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+4119 INFO: Processing standard module hook 
+'hook-platform.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+4248 INFO: Processing standard module hook 
+'hook-difflib.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+4473 INFO: Processing pre-safe-import-module hook 
+'hook-typing_extensions.py' from 'C:\\OmniMacro Dev\\ven
+v\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_impo
+rt_module'
+4474 INFO: SetuptoolsInfo: initializing cached 
+setuptools info...
+7652 INFO: Processing standard module hook 
+'hook-certifi.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\si
+te-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+7717 INFO: Processing standard module hook 
+'hook-anyio.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\site
+-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+8623 INFO: Processing standard module hook 
+'hook-pygments.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+10410 INFO: Processing standard module hook 
+'hook-sysconfig.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+11188 INFO: Processing pre-safe-import-module hook 
+'hook-six.moves.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\
+site-packages\\PyInstaller\\hooks\\pre_safe_import_modul
+e'
+11306 INFO: Processing standard module hook 
+'hook-pynput.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\sit
+e-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+11559 INFO: Processing standard module hook 
+'hook-PIL.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+11626 INFO: Processing standard module hook 
+'hook-PIL.Image.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+11895 INFO: Processing standard module hook 
+'hook-xml.etree.cElementTree.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+12051 INFO: Processing standard module hook 
+'hook-PIL.ImageFilter.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+12212 INFO: Processing pre-safe-import-module hook 
+'hook-packaging.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\
+site-packages\\PyInstaller\\hooks\\pre_safe_import_modul
+e'
+12222 INFO: Processing pre-find-module-path hook 
+'hook-tkinter.py' from 'C:\\OmniMacro Dev\\venv\\Lib\\si
+te-packages\\PyInstaller\\hooks\\pre_find_module_path'
+12223 INFO: TclTkInfo: initializing cached Tcl/Tk 
+info...
+12631 INFO: Processing standard module hook 
+'hook-_tkinter.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+12647 INFO: Analyzing hidden import 
+'PIL._tkinter_finder'
+12648 INFO: Processing module hooks (post-graph 
+stage)...
+13028 INFO: Processing standard module hook 
+'hook-PIL.SpiderImagePlugin.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14357 INFO: Processing standard module hook 
+'hook-_tkinter.py' from 'C:\\OmniMacro 
+Dev\\venv\\Lib\\site-packages\\PyInstaller\\hooks'
+14369 INFO: Performing binary vs. data reclassification 
+(1077 entries)
+14594 INFO: Looking for ctypes DLLs
+14631 INFO: Analyzing run-time hooks ...
+14634 INFO: Including run-time hook 
+'pyi_rth_inspect.py' from 'C:\\OmniMacro Dev\\venv\\Lib\
+\site-packages\\PyInstaller\\hooks\\rthooks'
+14637 INFO: Including run-time hook 
+'pyi_rth__tkinter.py' from 'C:\\OmniMacro Dev\\venv\\Lib
+\\site-packages\\PyInstaller\\hooks\\rthooks'
+14638 INFO: Including run-time hook 
+'pyi_rth_localhost_fletd.py' from 'C:\\OmniMacro Dev\\ve
+nv\\Lib\\site-packages\\flet_cli\\__pyinstaller\\rthooks
+'
+14638 INFO: Including run-time hook 
+'pyi_rth_pkgutil.py' from 'C:\\OmniMacro Dev\\venv\\Lib\
+\site-packages\\PyInstaller\\hooks\\rthooks'
+14640 INFO: Including run-time hook 
+'pyi_rth_multiprocessing.py' from 'C:\\OmniMacro Dev\\ve
+nv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+14667 INFO: Creating base_library.zip...
+14681 INFO: Looking for dynamic libraries
+15339 INFO: Extra DLL search directories 
+(AddDllDirectory): []
+15340 INFO: Extra DLL search directories (PATH): []
+16314 WARNING: Library not found: could not resolve 
+'MSVCP140D.dll', dependency of 'C:\\OmniMacro Dev\\venv\
+\Lib\\site-packages\\flet_desktop\\app\\flet\\libc++.dll
+'.
+16314 WARNING: Library not found: could not resolve 
+'MSVCP140D.dll', dependency of 'C:\\OmniMacro Dev\\venv\
+\Lib\\site-packages\\flet_desktop\\app\\flet\\vccorlib14
+0d.dll'.
+16346 INFO: Warnings written to C:\OmniMacro 
+Dev\build\OmniMacro\warn-OmniMacro.txt
+16405 INFO: Graph cross-reference written to 
+C:\OmniMacro Dev\build\OmniMacro\xref-OmniMacro.html
+16441 INFO: checking PYZ
+16455 INFO: Building because C:\OmniMacro 
+Dev\macro_core.py changed
+16456 INFO: Building PYZ (ZlibArchive) C:\OmniMacro 
+Dev\build\OmniMacro\PYZ-00.pyz
+17090 INFO: Building PYZ (ZlibArchive) C:\OmniMacro 
+Dev\build\OmniMacro\PYZ-00.pyz completed successfully.
+17117 INFO: checking PKG
+17123 INFO: Building because toc changed
+17123 INFO: Building PKG (CArchive) OmniMacro.pkg
+58832 INFO: Building PKG (CArchive) OmniMacro.pkg 
+completed successfully.
+58847 INFO: Bootloader C:\OmniMacro Dev\venv\Lib\site-pa
+ckages\PyInstaller\bootloader\Windows-64bit-intel\runw.e
+xe
+58847 INFO: checking EXE
+58859 INFO: Building because toc changed
+58859 INFO: Building EXE from EXE-00.toc
+58876 INFO: Copying bootloader EXE to C:\OmniMacro 
+Dev\dist\OmniMacro.exe
+58945 INFO: Copying icon to EXE
+59008 INFO: Copying 0 resources to EXE
+59008 INFO: Embedding manifest in EXE
+59076 INFO: Appending PKG archive to EXE
+59186 INFO: Fixing EXE headers
+59945 INFO: Building EXE from EXE-00.toc completed 
+successfully.
+59961 INFO: Build complete! The results are available 
+in: C:\OmniMacro Dev\dist

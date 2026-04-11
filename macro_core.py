@@ -6,6 +6,7 @@ import input_utils
 import random
 from crosshair_overlay import CrosshairOverlay, SHAPE_CROSS
 from screen_ocr import ScreenOCR
+from color_picker_overlay import select_region, pick_color
 
 class MacroCore:
     def __init__(self):
@@ -90,6 +91,16 @@ class MacroCore:
         # Screen OCR
         self.screen_ocr = ScreenOCR()
         self.on_ocr_capture = None  # callback(text) from UI
+
+        # Color Clicker Settings
+        self.colorclicker_enabled = False
+        self.colorclicker_region = None          # (x1, y1, x2, y2) screen coords
+        self.colorclicker_color = (255, 0, 0)   # RGB target color
+        self.colorclicker_tolerance = 30         # Euclidean RGB tolerance (0-150)
+        self.colorclicker_delay = 0.0            # Seconds to wait after detection
+        self.colorclicker_scan_interval = 0.05  # Seconds between scans
+        self.on_colorclicker_toggle = None
+        self._colorclicker_last_click = 0.0      # Timestamp of last click (cooldown)
         
         self.nihilism_phrases = [
             "omggggg bro i hate writing this",
@@ -429,7 +440,8 @@ class MacroCore:
         self.kb_macro_thread = threading.Thread(target=self._kb_macro_loop, daemon=True)
         self.antiafk_thread = threading.Thread(target=self._antiafk_loop, daemon=True)
         self.cameraspin_thread = threading.Thread(target=self._cameraspin_loop, daemon=True)
-        
+        self.colorclicker_thread = threading.Thread(target=self._colorclicker_loop, daemon=True)
+
         self.mouse_listener = mouse.Listener(on_click=self._on_click)
         self.key_listener = keyboard.Listener(on_press=self._on_press, on_release=self._on_release)
 
@@ -439,11 +451,12 @@ class MacroCore:
         self.kb_macro_thread.start()
         self.antiafk_thread.start()
         self.cameraspin_thread.start()
+        self.colorclicker_thread.start()
         self.mouse_listener.start()
         self.key_listener.start()
         self.crosshair_overlay.start()
 
-    def set_callback(self, autoclick_callback, kb_callback, recoil_callback=None, antiafk_callback=None, cameraspin_callback=None, humantyper_callback=None, crosshair_callback=None, ocr_capture_callback=None):
+    def set_callback(self, autoclick_callback, kb_callback, recoil_callback=None, antiafk_callback=None, cameraspin_callback=None, humantyper_callback=None, crosshair_callback=None, ocr_capture_callback=None, colorclicker_callback=None):
         self.on_autoclick_toggle = autoclick_callback
         self.on_kb_toggle = kb_callback
         self.on_recoil_toggle = recoil_callback
@@ -452,6 +465,7 @@ class MacroCore:
         self.on_humantyper_toggle = humantyper_callback
         self.on_crosshair_toggle = crosshair_callback
         self.on_ocr_capture = ocr_capture_callback
+        self.on_colorclicker_toggle = colorclicker_callback
         
     def start_key_binding(self, callback):
         self.on_key_bound = callback
@@ -618,6 +632,12 @@ class MacroCore:
             if self.on_ocr_capture:
                 self.on_ocr_capture()
             return
+
+        if key == Key.f11:
+            self.colorclicker_enabled = not self.colorclicker_enabled
+            if self.on_colorclicker_toggle:
+                self.on_colorclicker_toggle(self.colorclicker_enabled)
+            return
             
     def execute_custom_macro(self, macro_id, actions):
         self.active_macro_triggers.add(macro_id)
@@ -729,6 +749,66 @@ class MacroCore:
             else:
                 time.sleep(0.1)
 
+    def _colorclicker_loop(self):
+        """Background scanner: grabs a screenshot of the target region and
+        left-clicks when the target color is found within the given tolerance."""
+        try:
+            from PIL import ImageGrab
+        except ImportError:
+            return
+
+        import math
+
+        while self.running:
+            if not self.colorclicker_enabled or self.colorclicker_region is None:
+                time.sleep(0.05)
+                continue
+
+            try:
+                x1, y1, x2, y2 = self.colorclicker_region
+                # Grab just the region (fast)
+                region_img = ImageGrab.grab(bbox=(x1, y1, x2, y2))
+                tw, th = region_img.size
+                if tw == 0 or th == 0:
+                    time.sleep(self.colorclicker_scan_interval)
+                    continue
+
+                tr, tg, tb = self.colorclicker_color
+                tolerance = self.colorclicker_tolerance
+                found = False
+
+                # Sample pixels in a grid (every 3rd pixel) for performance
+                pixels = region_img.load()
+                step = max(1, min(tw, th) // 50)  # adaptive step
+                for py in range(0, th, step):
+                    for px in range(0, tw, step):
+                        p = pixels[px, py]
+                        pr, pg, pb = p[0], p[1], p[2]
+                        dist = math.sqrt(
+                            (pr - tr) ** 2 + (pg - tg) ** 2 + (pb - tb) ** 2
+                        )
+                        if dist <= tolerance:
+                            found = True
+                            break
+                    if found:
+                        break
+
+                if found:
+                    # Enforce a brief cooldown so we don't spam clicks
+                    now = time.time()
+                    if now - self._colorclicker_last_click >= max(0.3, self.colorclicker_delay + 0.1):
+                        if self.colorclicker_delay > 0:
+                            time.sleep(self.colorclicker_delay)
+                        # Confirm still enabled after delay
+                        if self.colorclicker_enabled:
+                            input_utils.click()
+                            self._colorclicker_last_click = time.time()
+
+            except Exception:
+                pass
+
+            time.sleep(self.colorclicker_scan_interval)
+
 
     def update_recoil(self, enabled, speed_y, speed_x, delay, mode):
         self.recoil_enabled = enabled
@@ -786,6 +866,20 @@ class MacroCore:
         self.cameraspin_enabled = enabled
         self.cameraspin_speed = speed
         self.cameraspin_direction = direction
+
+    def update_colorclicker(self, enabled, region=None, color=None,
+                             tolerance=None, delay=None, scan_interval=None):
+        self.colorclicker_enabled = enabled
+        if region is not None:
+            self.colorclicker_region = region
+        if color is not None:
+            self.colorclicker_color = color
+        if tolerance is not None:
+            self.colorclicker_tolerance = tolerance
+        if delay is not None:
+            self.colorclicker_delay = delay
+        if scan_interval is not None:
+            self.colorclicker_scan_interval = scan_interval
 
     def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled, crashout_enabled, crashout_count, nihilism_enabled, nihilism_count, vamp_enabled, vamp_count, typealong_enabled):
         self.humantyper_wpm_min = wpm_min

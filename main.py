@@ -11,6 +11,7 @@ import input_utils
 from macro_core import core
 from crosshair_overlay import SHAPE_CROSS, SHAPE_CIRCLE, SHAPE_DOT, SHAPE_CROSS_CIRCLE, SHAPE_CROSS_DOT
 from screen_ocr import get_tesseract_status, is_tesseract_available
+import color_picker_overlay
 
 def main(page: ft.Page):
     # Set AppUserModelID to ensure taskbar icon works on Windows
@@ -362,7 +363,12 @@ def main(page: ft.Page):
     def trigger_ocr_from_hotkey():
         start_ocr_capture(None)
 
-    core.set_callback(update_autoclick_switch, update_kb_switch, update_recoil_switch, update_antiafk_switch, update_cameraspin_switch, update_humantyper_status, update_crosshair_switch, trigger_ocr_from_hotkey)
+    # Callback for F11 toggle (Color Clicker)
+    def update_colorclicker_switch(state):
+        colorclicker_switch.value = state
+        page.update()
+
+    core.set_callback(update_autoclick_switch, update_kb_switch, update_recoil_switch, update_antiafk_switch, update_cameraspin_switch, update_humantyper_status, update_crosshair_switch, trigger_ocr_from_hotkey, update_colorclicker_switch)
     core.on_humantyper_pause = update_humantyper_pause
 
     autoclick_content = ft.Column([
@@ -769,13 +775,16 @@ def main(page: ft.Page):
                 kb_bind_btn.disabled = False
                 return
             key_name = key_data['name']
+            new_key = int(key_data['value'])
         else:
             key_name = str(key_data)
+            new_key = core.kb_macro_key
 
         kb_bind_btn.text = f"Target Key: {key_name}"
         kb_bind_btn.disabled = False
         page.update()
-        # Trigger update to ensure core has fresh state if needed, though core.kb_macro_key is already set
+        core.kb_macro_key = new_key
+        # Trigger update to ensure core has fresh state if needed
         core.update_kb_macro(kb_switch.value, core.kb_macro_key, float(kb_delay_slider.value) / 1000.0)
 
     kb_switch = ft.Switch(label="Enable Keyboard Macro", on_change=on_kb_change)
@@ -1251,6 +1260,261 @@ def main(page: ft.Page):
         )
     ], scroll="auto", expand=True)
 
+    # --- Color Clicker Controls ---
+
+    # Internal state
+    _colorclicker_region = [None]   # holds (x1,y1,x2,y2) or None
+    _colorclicker_color  = [(255, 0, 0)]   # holds (r,g,b)
+
+    def _rgb_to_hex(rgb):
+        return '#{:02X}{:02X}{:02X}'.format(*rgb)
+
+    def _hex_to_rgb(hex_str):
+        """Parse '#RRGGBB' or 'RRGGBB'. Returns (r,g,b) or None on failure."""
+        h = hex_str.strip().lstrip('#')
+        if len(h) == 6:
+            try:
+                return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+            except ValueError:
+                pass
+        return None
+
+    def _push_colorclicker_settings():
+        core.update_colorclicker(
+            colorclicker_switch.value,
+            region=_colorclicker_region[0],
+            color=_colorclicker_color[0],
+            tolerance=int(colorclicker_tolerance_slider.value),
+            delay=float(colorclicker_delay_slider.value) / 1000.0,
+            scan_interval=float(colorclicker_interval_slider.value) / 1000.0,
+        )
+
+    def _refresh_color_ui():
+        """Sync the swatch and hex field from _colorclicker_color."""
+        rgb = _colorclicker_color[0]
+        hex_val = _rgb_to_hex(rgb)
+        colorclicker_color_swatch.bgcolor = hex_val
+        colorclicker_hex_input.value = hex_val
+        colorclicker_rgb_label.value = f"R:{rgb[0]}  G:{rgb[1]}  B:{rgb[2]}"
+        colorclicker_color_swatch.update()
+        colorclicker_hex_input.update()
+        colorclicker_rgb_label.update()
+
+    def _refresh_region_ui():
+        coords = _colorclicker_region[0]
+        if coords:
+            x1, y1, x2, y2 = coords
+            colorclicker_region_label.value = (
+                f"Region: ({x1}, {y1}) → ({x2}, {y2})  "
+                f"[{x2-x1}×{y2-y1} px]"
+            )
+            colorclicker_region_label.color = "#66bb6a"
+        else:
+            colorclicker_region_label.value = "No region selected"
+            colorclicker_region_label.color = "grey"
+        colorclicker_region_label.update()
+
+    def on_colorclicker_change(e=None):
+        _push_colorclicker_settings()
+        colorclicker_tolerance_val.value = str(int(colorclicker_tolerance_slider.value))
+        colorclicker_delay_val.value = str(int(colorclicker_delay_slider.value))
+        colorclicker_interval_val.value = str(int(colorclicker_interval_slider.value))
+        page.update()
+
+    def on_colorclicker_hex_change(e):
+        rgb = _hex_to_rgb(colorclicker_hex_input.value)
+        if rgb:
+            _colorclicker_color[0] = rgb
+            _refresh_color_ui()
+            _push_colorclicker_settings()
+
+    def start_region_select(e):
+        colorclicker_region_btn.text = "Selecting..."
+        colorclicker_region_btn.disabled = True
+        page.update()
+
+        def do_select():
+            def minimize(): page.window.minimized = True; page.update()
+            def restore(): page.window.minimized = False; page.update()
+            coords = color_picker_overlay.select_region(
+                minimize_fn=minimize, restore_fn=restore
+            )
+            if coords:
+                _colorclicker_region[0] = coords
+                _push_colorclicker_settings()
+            colorclicker_region_btn.text = "Select Region"
+            colorclicker_region_btn.disabled = False
+            _refresh_region_ui()
+            page.update()
+
+        threading.Thread(target=do_select, daemon=True).start()
+
+    def start_eyedropper(e):
+        colorclicker_eyedropper_btn.text = "Picking..."
+        colorclicker_eyedropper_btn.disabled = True
+        page.update()
+
+        def do_pick():
+            def minimize(): page.window.minimized = True; page.update()
+            def restore(): page.window.minimized = False; page.update()
+            rgb = color_picker_overlay.pick_color(
+                minimize_fn=minimize, restore_fn=restore
+            )
+            if rgb:
+                _colorclicker_color[0] = rgb
+                _refresh_color_ui()
+                _push_colorclicker_settings()
+            colorclicker_eyedropper_btn.text = "Eyedropper"
+            colorclicker_eyedropper_btn.disabled = False
+            page.update()
+
+        threading.Thread(target=do_pick, daemon=True).start()
+
+    # Controls
+    colorclicker_switch = ft.Switch(
+        label="Enable Color Clicker",
+        on_change=on_colorclicker_change
+    )
+
+    colorclicker_region_btn = ft.ElevatedButton(
+        "Select Region",
+        icon="crop_free",
+        on_click=start_region_select,
+        bgcolor="#37474f",
+        color="white",
+    )
+    colorclicker_region_label = ft.Text("No region selected", color="grey", size=12, italic=True)
+
+    colorclicker_color_swatch = ft.Container(
+        width=48, height=48,
+        bgcolor="#FF0000",
+        border_radius=8,
+        border=ft.border.all(2, "#555555"),
+        tooltip="Target color"
+    )
+    colorclicker_hex_input = ft.TextField(
+        value="#FF0000",
+        width=120,
+        label="Hex",
+        on_change=on_colorclicker_hex_change,
+        hint_text="#RRGGBB",
+    )
+    colorclicker_rgb_label = ft.Text("R:255  G:0  B:0", size=12, color="grey")
+    colorclicker_eyedropper_btn = ft.ElevatedButton(
+        "Eyedropper",
+        icon="colorize",
+        on_click=start_eyedropper,
+        bgcolor="#37474f",
+        color="white",
+    )
+
+    colorclicker_tolerance_slider = ft.Slider(
+        min=0, max=150, divisions=150, label="{value}",
+        value=30, on_change=on_colorclicker_change, expand=True
+    )
+    colorclicker_tolerance_val = ft.TextField(
+        value="30", width=70, on_change=on_colorclicker_change
+    )
+
+    colorclicker_delay_slider = ft.Slider(
+        min=0, max=5000, divisions=100, label="{value} ms",
+        value=0, on_change=on_colorclicker_change, expand=True
+    )
+    colorclicker_delay_val = ft.TextField(
+        value="0", width=80, on_change=on_colorclicker_change, suffix_text="ms"
+    )
+
+    colorclicker_interval_slider = ft.Slider(
+        min=10, max=1000, divisions=99, label="{value} ms",
+        value=50, on_change=on_colorclicker_change, expand=True
+    )
+    colorclicker_interval_val = ft.TextField(
+        value="50", width=80, on_change=on_colorclicker_change, suffix_text="ms"
+    )
+
+    colorclicker_content = ft.Column([
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Color Clicker", style="headlineMedium"),
+                ft.Text(
+                    "Monitors a screen region and auto-clicks when a target color is detected.",
+                    color="grey"
+                ),
+                colorclicker_switch,
+                ft.Text("Activation: Press 'F11' to Toggle ON/OFF", color="grey"),
+                ft.Divider(),
+
+                # Region
+                ft.Text("Capture Region", style="titleMedium"),
+                ft.Text(
+                    "Draw a rectangle on screen to monitor for the target color.",
+                    color="grey", size=12
+                ),
+                ft.Row([colorclicker_region_btn], spacing=10),
+                colorclicker_region_label,
+                ft.Divider(),
+
+                # Color picker
+                ft.Text("Target Color", style="titleMedium"),
+                ft.Text(
+                    "Pick a color with the eyedropper or type a hex code.",
+                    color="grey", size=12
+                ),
+                ft.Row([
+                    colorclicker_color_swatch,
+                    ft.Column([
+                        ft.Row([
+                            colorclicker_eyedropper_btn,
+                            colorclicker_hex_input,
+                        ], spacing=10, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                        colorclicker_rgb_label,
+                    ], spacing=4)
+                ], spacing=15, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                ft.Divider(),
+
+                # Tolerance
+                ft.Text("Color Tolerance", style="titleMedium"),
+                ft.Text(
+                    "How closely the pixel must match the target (0 = exact, 150 = very loose).",
+                    color="grey", size=12
+                ),
+                ft.Row([colorclicker_tolerance_slider, colorclicker_tolerance_val],
+                       alignment="spaceBetween"),
+                ft.Divider(),
+
+                # Delay before click
+                ft.Text("Pre-Click Delay", style="titleMedium"),
+                ft.Text(
+                    "How long to wait after detecting the color before clicking (ms).",
+                    color="grey", size=12
+                ),
+                ft.Row([colorclicker_delay_slider, colorclicker_delay_val],
+                       alignment="spaceBetween"),
+                ft.Divider(),
+
+                # Scan interval
+                ft.Text("Scan Interval", style="titleMedium"),
+                ft.Text(
+                    "How often to check the region for the color (ms). Lower = faster but more CPU.",
+                    color="grey", size=12
+                ),
+                ft.Row([colorclicker_interval_slider, colorclicker_interval_val],
+                       alignment="spaceBetween"),
+                ft.Divider(),
+
+                ft.Text(
+                    "ℹ️ A 300ms cooldown between clicks is enforced to prevent spam.",
+                    color="grey", size=11, italic=True
+                ),
+                ft.Text(
+                    "⚠️ For best accuracy use a small, focused region rather than the whole screen.",
+                    color="#ffa726", size=11, italic=True
+                ),
+            ], spacing=8),
+            padding=ft.padding.only(right=15)
+        )
+    ], scroll="auto", expand=True)
+
     # --- Info Controls ---
     feature_cards = []  # Store cards for theme toggle updates
     
@@ -1368,6 +1632,17 @@ def main(page: ft.Page):
 """
     ocr_card = create_feature_card("Screen OCR", ocr_info)
 
+    colorclicker_info_text = """
+- **Activation**: Toggle switch or press **F11**.
+- **Region**: Click **Select Region**, drag a box over the screen area to monitor.
+- **Color**: Use **Eyedropper** to click any pixel on screen, or type a **Hex code** directly.
+- **Tolerance**: How loosely the color must match (0 = exact, 150 = very loose).
+- **Pre-Click Delay**: Wait this many ms after detecting the color before clicking.
+- **Scan Interval**: How frequently the region is checked (lower = more responsive, more CPU).
+- **Cooldown**: A 300ms minimum cooldown is enforced between clicks to prevent spam.
+"""
+    colorclicker_card = create_feature_card("Color Clicker", colorclicker_info_text)
+
     important_card = ft.Container(
         content=ft.Row([
             ft.Icon("warning", color="#c62828", size=30),
@@ -1446,6 +1721,7 @@ def main(page: ft.Page):
                 custommacro_card,
                 crosshair_card,
                 ocr_card,
+                colorclicker_card,
             ], spacing=10),
             padding=ft.padding.only(right=15)
         )
@@ -1487,6 +1763,8 @@ def main(page: ft.Page):
             switcher.content = crosshair_content
         elif idx == 8:
             switcher.content = ocr_content
+        elif idx == 9:
+            switcher.content = colorclicker_content
         page.update()
 
     rail = ft.NavigationRail(
@@ -1522,6 +1800,9 @@ def main(page: ft.Page):
             ),
             ft.NavigationRailDestination(
                 icon="document_scanner", selected_icon="document_scanner", label="OCR"
+            ),
+            ft.NavigationRailDestination(
+                icon="colorize", selected_icon="colorize", label="Color Click"
             ),
         ],
         on_change=on_nav_change,

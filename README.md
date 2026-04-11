@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/OCR-Tesseract-orange" alt="Tesseract OCR"/>
   <img src="https://img.shields.io/badge/Input-pynput-green" alt="Pynput"/>
   <img src="https://img.shields.io/badge/Imaging-Pillow-yellowgreen" alt="Pillow"/>
+  <img src="https://img.shields.io/badge/UI-Tkinter-lightblue" alt="Tkinter"/>
   <img src="https://img.shields.io/badge/Build-PyInstaller-lightgrey" alt="PyInstaller"/>
   <br/>
   <img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="License"/>
@@ -110,6 +111,20 @@ A sophisticated typing simulator that mimics human behavior:
 - **Cancel** with ESC or right-click
 - **Hotkey**: `F10`
 
+### Color Clicker
+Monitors a user-defined screen region and automatically left-clicks when a target color is detected:
+
+| Feature | Description |
+|---------|-------------|
+| **Region Selector** | Draw a rectangle on screen to define the area to monitor (app minimizes for a clean view) |
+| **Eyedropper** | Full-screen overlay with live magnifier — click any pixel to pick its color |
+| **Hex Input** | Type any `#RRGGBB` hex code directly; syncs two-way with the eyedropper swatch |
+| **Color Tolerance** | Euclidean RGB distance matching (0 = exact, 150 = very loose) |
+| **Pre-Click Delay** | Configurable delay (0–5000ms) between color detection and the actual click |
+| **Scan Interval** | Control how often the region is sampled (10–1000ms); lower = more responsive |
+| **Cooldown** | Built-in 300ms cooldown between clicks prevents spam |
+| **Hotkey** | `F11` to toggle on/off |
+
 ---
 
 ## Tech Stack
@@ -121,6 +136,7 @@ A sophisticated typing simulator that mimics human behavior:
 | **Input Handling** | [pynput](https://pypi.org/project/pynput/) |
 | **OCR Engine** | [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (bundled) |
 | **Image Processing** | [Pillow](https://python-pillow.org/) |
+| **Screen Overlays** | [Tkinter](https://docs.python.org/3/library/tkinter.html) (region selector & eyedropper) |
 | **Packaging** | [PyInstaller](https://pyinstaller.org/) |
 | **OS Integration** | Windows API (ctypes) |
 
@@ -168,17 +184,18 @@ pyinstaller OmniMacro.spec --noconfirm
 
 ```
 OmniMacro/
-├── main.py              # GUI application and UI logic
-├── macro_core.py        # Core automation engine
-├── input_utils.py       # Low-level Windows input utilities
-├── crosshair_overlay.py # Win32 crosshair overlay window
-├── screen_ocr.py        # Screen region capture and OCR
-├── OmniMacro.spec       # PyInstaller build configuration
-├── requirements.txt     # Python dependencies
+├── main.py                  # GUI application and UI logic
+├── macro_core.py            # Core automation engine
+├── input_utils.py           # Low-level Windows input utilities
+├── crosshair_overlay.py     # Win32 crosshair overlay window
+├── screen_ocr.py            # Screen region capture and OCR
+├── color_picker_overlay.py  # Region selector and eyedropper tool
+├── OmniMacro.spec           # PyInstaller build configuration
+├── requirements.txt         # Python dependencies
 ├── assets/
-│   └── icon.ico         # Application icon
+│   └── icon.ico             # Application icon
 └── dist/
-    └── OmniMacro.exe    # Compiled executable
+    └── OmniMacro.exe        # Compiled executable
 ```
 
 ---
@@ -202,6 +219,7 @@ OmniMacro/
 | `F8` | Toggle Camera Spin |
 | `F9` | Toggle Crosshair Overlay |
 | `F10` | Capture Screen Region (OCR) |
+| `F11` | Toggle Color Clicker |
 
 ---
 
