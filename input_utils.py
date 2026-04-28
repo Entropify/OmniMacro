@@ -45,6 +45,8 @@ MOUSEEVENTF_LEFTDOWN = 0x0002
 MOUSEEVENTF_LEFTUP = 0x0004
 MOUSEEVENTF_RIGHTDOWN = 0x0008
 MOUSEEVENTF_RIGHTUP = 0x0010
+MOUSEEVENTF_ABSOLUTE = 0x8000
+MOUSEEVENTF_VIRTUALDESK = 0x4000   # map coords to entire virtual desktop (all monitors)
 KEYEVENTF_KEYUP = 0x0002
 KEYEVENTF_SCANCODE = 0x0008
 
@@ -264,4 +266,108 @@ def set_keyboard_suppression(enabled):
     """Toggle whether human keystrokes are suppressed (blocked). Hook must be installed first."""
     global _keyboard_suppression_enabled
     _keyboard_suppression_enabled = enabled
+
+
+# ─── Absolute Cursor Helpers ──────────────────────────────────────────────────
+
+class _POINT(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+
+# DPI Awareness Context constants (Win10 1607+)
+_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = ctypes.c_void_p(-4)
+
+_u32 = ctypes.windll.user32
+try:
+    _SetThreadDpiAwarenessContext = _u32.SetThreadDpiAwarenessContext
+    _SetThreadDpiAwarenessContext.restype = ctypes.c_void_p
+    _SetThreadDpiAwarenessContext.argtypes = [ctypes.c_void_p]
+    _HAS_DPI_CONTEXT_API = True
+except AttributeError:
+    _HAS_DPI_CONTEXT_API = False
+
+
+def _with_physical_dpi_context(fn):
+    """
+    Run fn() while thread DPI awareness is forced to PER_MONITOR_AWARE_V2
+    so that GetSystemMetrics / GetCursorPos return PHYSICAL pixel values.
+    Falls back gracefully on older Windows.
+    """
+    if _HAS_DPI_CONTEXT_API:
+        try:
+            prev = _SetThreadDpiAwarenessContext(
+                _DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+            )
+            try:
+                return fn()
+            finally:
+                if prev:
+                    _SetThreadDpiAwarenessContext(ctypes.c_void_p(prev))
+            return
+        except Exception:
+            pass
+    return fn()
+
+
+def get_cursor_pos():
+    """Return (x, y) of current cursor in the process's native DPI context."""
+    pt = _POINT()
+    ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+    return (pt.x, pt.y)
+
+
+def get_physical_cursor_pos():
+    """
+    Return (x, y) of cursor in TRUE PHYSICAL screen pixels.
+    Unaffected by process DPI awareness or DPI scaling.
+    """
+    def _read():
+        pt = _POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+        return (pt.x, pt.y)
+    return _with_physical_dpi_context(_read)
+
+
+def move_to(x, y):
+    """
+    Move cursor to absolute physical screen coordinates.
+
+    Uses SetCursorPos in a forced per-monitor-aware DPI context so the (x, y)
+    values are always interpreted as PHYSICAL pixels — unambiguous, no
+    normalisation math, works across all monitors including those with
+    different DPI scales.
+    """
+    _with_physical_dpi_context(
+        lambda: ctypes.windll.user32.SetCursorPos(int(x), int(y))
+    )
+
+
+def click_at(x, y):
+    """
+    Teleport cursor to physical (x, y) and left-click there.
+
+    Why SetCursorPos instead of MOUSEEVENTF_ABSOLUTE:
+      MOUSEEVENTF_ABSOLUTE requires normalising (x, y) against the virtual
+      desktop dimensions, but the normalisation denominator depends on the
+      *process* DPI awareness context (logical vs physical), which can differ
+      from the context we used to measure the screen — causing systematic
+      mis-click.  SetCursorPos in a forced per-monitor-aware thread context
+      always interprets coordinates as physical pixels regardless of process
+      DPI awareness, making it completely unambiguous.
+
+    Works cross-monitor: physical coordinates span the entire virtual desktop.
+    """
+    # Position cursor at exact physical location
+    _with_physical_dpi_context(
+        lambda: ctypes.windll.user32.SetCursorPos(int(x), int(y))
+    )
+    # Brief settle — gives the OS time to process the cursor move
+    # before the click event is dispatched to the window under the cursor.
+    time.sleep(0.008)
+    # Fire click at the current cursor position (no ABSOLUTE/MOVE flags —
+    # the click is sent to wherever SetCursorPos placed the cursor).
+    inputs = (INPUT * 2)(
+        _input_mouse(MOUSEEVENTF_LEFTDOWN),
+        _input_mouse(MOUSEEVENTF_LEFTUP),
+    )
+    SendInput(2, inputs, ctypes.sizeof(INPUT))
 

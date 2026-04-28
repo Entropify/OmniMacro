@@ -7,6 +7,7 @@ import random
 from crosshair_overlay import CrosshairOverlay, SHAPE_CROSS
 from screen_ocr import ScreenOCR
 from color_picker_overlay import select_region, pick_color
+import input_utils
 
 class MacroCore:
     def __init__(self):
@@ -101,6 +102,8 @@ class MacroCore:
         self.colorclicker_scan_interval = 0.05  # Seconds between scans
         self.on_colorclicker_toggle = None
         self._colorclicker_last_click = 0.0      # Timestamp of last click (cooldown)
+        self.colorclicker_use_preset_pos = False # If True, click at a fixed screen position
+        self.colorclicker_click_pos = None       # (x, y) preset click coordinate
         
         self.nihilism_phrases = [
             "omggggg bro i hate writing this",
@@ -801,7 +804,15 @@ class MacroCore:
                             time.sleep(self.colorclicker_delay)
                         # Confirm still enabled after delay
                         if self.colorclicker_enabled:
-                            input_utils.click()
+                            if self.colorclicker_use_preset_pos and self.colorclicker_click_pos:
+                                # Save where the cursor currently is (physical, any monitor)
+                                orig = input_utils.get_physical_cursor_pos()
+                                cx, cy = self.colorclicker_click_pos
+                                input_utils.click_at(cx, cy)
+                                # Return cursor to its original position
+                                input_utils.move_to(*orig)
+                            else:
+                                input_utils.click()
                             self._colorclicker_last_click = time.time()
 
             except Exception:
@@ -868,7 +879,8 @@ class MacroCore:
         self.cameraspin_direction = direction
 
     def update_colorclicker(self, enabled, region=None, color=None,
-                             tolerance=None, delay=None, scan_interval=None):
+                             tolerance=None, delay=None, scan_interval=None,
+                             use_preset_pos=None, click_pos=None):
         self.colorclicker_enabled = enabled
         if region is not None:
             self.colorclicker_region = region
@@ -880,6 +892,10 @@ class MacroCore:
             self.colorclicker_delay = delay
         if scan_interval is not None:
             self.colorclicker_scan_interval = scan_interval
+        if use_preset_pos is not None:
+            self.colorclicker_use_preset_pos = use_preset_pos
+        if click_pos is not None:
+            self.colorclicker_click_pos = click_pos
 
     def update_humantyper(self, wpm_min, wpm_max, error_rate, correction_speed, max_typos, typo_mode, pause_min, pause_max, pause_freq, synonym_enabled, synonym_freq, sentence_pause_enabled, sentence_pause_freq, sentence_pause_min, sentence_pause_max, para_pause_enabled, para_pause_freq, para_pause_min, para_pause_max, special_char_delay_enabled, crashout_enabled, crashout_count, nihilism_enabled, nihilism_count, vamp_enabled, vamp_count, typealong_enabled):
         self.humantyper_wpm_min = wpm_min

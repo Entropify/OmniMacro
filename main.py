@@ -1265,6 +1265,7 @@ def main(page: ft.Page):
     # Internal state
     _colorclicker_region = [None]   # holds (x1,y1,x2,y2) or None
     _colorclicker_color  = [(255, 0, 0)]   # holds (r,g,b)
+    _colorclicker_click_pos = [None]   # holds (x, y) preset click position or None
 
     def _rgb_to_hex(rgb):
         return '#{:02X}{:02X}{:02X}'.format(*rgb)
@@ -1287,18 +1288,19 @@ def main(page: ft.Page):
             tolerance=int(colorclicker_tolerance_slider.value),
             delay=float(colorclicker_delay_slider.value) / 1000.0,
             scan_interval=float(colorclicker_interval_slider.value) / 1000.0,
+            use_preset_pos=colorclicker_preset_pos_switch.value,
+            click_pos=_colorclicker_click_pos[0],
         )
 
     def _refresh_color_ui():
-        """Sync the swatch and hex field from _colorclicker_color."""
+        """Sync the swatch and hex field from _colorclicker_color.
+        NOTE: Callers must call page.update() after this to flush changes.
+        """
         rgb = _colorclicker_color[0]
         hex_val = _rgb_to_hex(rgb)
         colorclicker_color_swatch.bgcolor = hex_val
         colorclicker_hex_input.value = hex_val
         colorclicker_rgb_label.value = f"R:{rgb[0]}  G:{rgb[1]}  B:{rgb[2]}"
-        colorclicker_color_swatch.update()
-        colorclicker_hex_input.update()
-        colorclicker_rgb_label.update()
 
     def _refresh_region_ui():
         coords = _colorclicker_region[0]
@@ -1314,6 +1316,20 @@ def main(page: ft.Page):
             colorclicker_region_label.color = "grey"
         colorclicker_region_label.update()
 
+    def _refresh_preset_pos_ui():
+        coords = _colorclicker_click_pos[0]
+        if coords:
+            colorclicker_preset_pos_label.value = f"Click Position: ({coords[0]}, {coords[1]})"
+            colorclicker_preset_pos_label.color = "#66bb6a"
+        else:
+            colorclicker_preset_pos_label.value = "No position set"
+            colorclicker_preset_pos_label.color = "grey"
+        # Show the set-position row only when the switch is ON
+        colorclicker_preset_pos_row.visible = colorclicker_preset_pos_switch.value
+        # NOTE: Callers must call page.update() after this — do not call
+        # individual control.update() here; concurrent updates from a background
+        # thread cause Flet to drop into loading/reconnecting state.
+
     def on_colorclicker_change(e=None):
         _push_colorclicker_settings()
         colorclicker_tolerance_val.value = str(int(colorclicker_tolerance_slider.value))
@@ -1327,6 +1343,32 @@ def main(page: ft.Page):
             _colorclicker_color[0] = rgb
             _refresh_color_ui()
             _push_colorclicker_settings()
+
+    def on_colorclicker_preset_pos_toggle(e):
+        _refresh_preset_pos_ui()
+        _push_colorclicker_settings()
+        page.update()
+
+    def start_set_preset_pos(e):
+        colorclicker_preset_pos_btn.text = "Picking..."
+        colorclicker_preset_pos_btn.disabled = True
+        page.update()
+
+        def do_pick():
+            def minimize(): page.window.minimized = True; page.update()
+            def restore(): page.window.minimized = False; page.update()
+            pt = color_picker_overlay.pick_point(
+                minimize_fn=minimize, restore_fn=restore
+            )
+            if pt:
+                _colorclicker_click_pos[0] = pt
+                _push_colorclicker_settings()
+            colorclicker_preset_pos_btn.text = "Set Position"
+            colorclicker_preset_pos_btn.disabled = False
+            _refresh_preset_pos_ui()
+            page.update()
+
+        threading.Thread(target=do_pick, daemon=True).start()
 
     def start_region_select(e):
         colorclicker_region_btn.text = "Selecting..."
@@ -1374,6 +1416,33 @@ def main(page: ft.Page):
     colorclicker_switch = ft.Switch(
         label="Enable Color Clicker",
         on_change=on_colorclicker_change
+    )
+
+    colorclicker_preset_pos_switch = ft.Switch(
+        label="Click at Preset Position",
+        value=False,
+        on_change=on_colorclicker_preset_pos_toggle,
+        tooltip="When enabled, clicks at a preset screen location instead of the current cursor position.",
+    )
+    colorclicker_preset_pos_btn = ft.ElevatedButton(
+        "Set Position",
+        icon="my_location",
+        on_click=start_set_preset_pos,
+        bgcolor="#37474f",
+        color="white",
+        tooltip="Click a spot on the screen to set where the auto-click will land.",
+    )
+    colorclicker_preset_pos_label = ft.Text(
+        "No position set", color="grey", size=12, italic=True
+    )
+    colorclicker_preset_pos_row = ft.Row(
+        [
+            colorclicker_preset_pos_btn,
+            colorclicker_preset_pos_label,
+        ],
+        spacing=12,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        visible=False,
     )
 
     colorclicker_region_btn = ft.ElevatedButton(
@@ -1470,6 +1539,25 @@ def main(page: ft.Page):
                         colorclicker_rgb_label,
                     ], spacing=4)
                 ], spacing=15, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                ft.Divider(),
+
+                # Preset click position
+                ft.Text("Click Position", style="titleMedium"),
+                ft.Text(
+                    "Optionally click at a fixed position instead of the current cursor location.",
+                    color="grey", size=12
+                ),
+                colorclicker_preset_pos_switch,
+                colorclicker_preset_pos_row,
+                ft.Text(
+                    "When triggered, the cursor silently teleports to the preset position, clicks, "
+                    "then instantly returns to wherever it was — your cursor won't stay there.",
+                    color="grey", size=11, italic=True
+                ),
+                ft.Text(
+                    "✅ Cross-monitor: the preset position can be on a different monitor than your cursor.",
+                    color="#66bb6a", size=11, italic=True
+                ),
                 ft.Divider(),
 
                 # Tolerance
@@ -1637,6 +1725,7 @@ def main(page: ft.Page):
 - **Region**: Click **Select Region**, drag a box over the screen area to monitor.
 - **Color**: Use **Eyedropper** to click any pixel on screen, or type a **Hex code** directly.
 - **Tolerance**: How loosely the color must match (0 = exact, 150 = very loose).
+- **Click at Preset Position**: When enabled, set a fixed screen coordinate. On detection the cursor teleports there, clicks, then returns to its original position invisibly.
 - **Pre-Click Delay**: Wait this many ms after detecting the color before clicking.
 - **Scan Interval**: How frequently the region is checked (lower = more responsive, more CPU).
 - **Cooldown**: A 300ms minimum cooldown is enforced between clicks to prevent spam.
@@ -1705,7 +1794,7 @@ def main(page: ft.Page):
                         ft.Row([
                             ft.Text("made by Entropify", size=12, color="grey", italic=True),
                             ft.Text("•", size=12, color="grey"),
-                            ft.Text("v1.0.2", size=12, color="grey", italic=True)
+                            ft.Text("v1.1.2", size=12, color="grey", italic=True)
                         ], spacing=5)
                     ], spacing=2),
                     theme_toggle

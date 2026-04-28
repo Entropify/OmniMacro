@@ -122,6 +122,7 @@ Monitors a user-defined screen region and automatically left-clicks when a targe
 | **Color Tolerance** | Euclidean RGB distance matching (0 = exact, 150 = very loose) |
 | **Pre-Click Delay** | Configurable delay (0–5000ms) between color detection and the actual click |
 | **Scan Interval** | Control how often the region is sampled (10–1000ms); lower = more responsive |
+| **Preset Click Position** | Optionally click at a fixed screen coordinate instead of the current cursor — set via an on-screen point picker; cursor returns to its original position after each click; works cross-monitor |
 | **Cooldown** | Built-in 300ms cooldown between clicks prevents spam |
 | **Hotkey** | `F11` to toggle on/off |
 
