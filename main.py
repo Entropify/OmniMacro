@@ -24,17 +24,29 @@ def main(page: ft.Page):
     page.title = "OmniMacro"
     
     # Custom dark theme with black/grey (no blue tint)
+    # Note: `background` and `on_background` were removed in newer Flet versions (Material 3).
+    # Use `surface_container_lowest` for the page background and `on_surface` for text on background.
     page.theme = ft.Theme(color_scheme_seed="grey")
-    page.dark_theme = ft.Theme(
-        color_scheme=ft.ColorScheme(
-            background="#121212",
-            surface="#1e1e1e",
-            on_background="#e0e0e0",
-            on_surface="#e0e0e0",
-            primary="#9e9e9e",
-            on_primary="#000000",
-        ),
+    _color_scheme_kwargs = dict(
+        surface="#1e1e1e",
+        surface_container_lowest="#121212",
+        on_surface="#e0e0e0",
+        primary="#9e9e9e",
+        on_primary="#000000",
     )
+    # Gracefully support older Flet installs that still have `background`/`on_background`
+    try:
+        page.dark_theme = ft.Theme(
+            color_scheme=ft.ColorScheme(**_color_scheme_kwargs),
+        )
+    except TypeError:
+        page.dark_theme = ft.Theme(
+            color_scheme=ft.ColorScheme(
+                background="#121212",
+                on_background="#e0e0e0",
+                **_color_scheme_kwargs,
+            ),
+        )
     page.theme_mode = ft.ThemeMode.DARK
     page.bgcolor = "#121212"
     
