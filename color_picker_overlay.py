@@ -94,6 +94,7 @@ def select_region(minimize_fn=None, restore_fn=None):
             if cancelled:
                 result['coords'] = None
             try:
+                root.quit()
                 root.destroy()
             except Exception:
                 pass
@@ -271,6 +272,7 @@ def pick_color(minimize_fn=None, restore_fn=None):
             if cancelled:
                 result['color'] = None
             try:
+                root.quit()
                 root.destroy()
             except Exception:
                 pass
@@ -479,6 +481,7 @@ def pick_point(minimize_fn=None, restore_fn=None):
             if cancelled:
                 result['point'] = None
             try:
+                root.quit()
                 root.destroy()
             except Exception:
                 pass

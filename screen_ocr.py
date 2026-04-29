@@ -232,6 +232,7 @@ class ScreenOCR:
                 state['destroyed'] = True
                 _debug_log("Closing overlay window")
                 try:
+                    root.quit()
                     root.destroy()
                 except Exception:
                     pass
